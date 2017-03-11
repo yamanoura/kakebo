@@ -1,0 +1,122 @@
+{% extends 'common/base.html' %}
+{% load bootstrap %}
+
+{% block title %}勘定科目検索{% endblock %}
+
+{% block page_name %}
+勘定科目検索
+{% endblock %}
+
+{% block page_desc %}
+勘定科目情報の検索を行う
+{% endblock %}
+
+{% block main %}
+<form method="get" action="" name="filter_form">
+  {% csrf_token %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	勘定科目名：
+      </div>
+      <div class="col-xs-8 col-sm-10">
+	<input id="search_at_name" name="search_at_name" type="text" class="form-control" value="{{ search_at_name }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	勘定科目種類：
+      </div>
+      <div class="col-xs-8 col-sm-10 text-left">
+	<SELECT ID="search_at_type" name="search_at_type" class="form-control">
+	  <OPTION VALUE="" 
+		  {% ifequal search_at_type "" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >---------</OPTION>
+	  <OPTION VALUE="0"
+		  {% ifequal search_at_type "0" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >資産</OPTION>
+	  <OPTION VALUE="1"
+		  {% ifequal search_at_type "1" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >負債</OPTION>
+	  <OPTION VALUE="2"
+		  {% ifequal search_at_type "2" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >資本</OPTION>
+	  <OPTION VALUE="3"
+		  {% ifequal search_at_type "3" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >収益</OPTION>
+	  <OPTION VALUE="4"
+		  {% ifequal search_at_type "4" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >費用</OPTION>
+	</SELECT>
+      </div>
+    </div>
+    <div class="row">      
+      <div class="col-xs-12 col-sm-12 text-left">
+	<button type="submit" class="btn btn-primary input-lg form-control">
+	  検索
+	</button>
+      </div>
+    </div>
+  </div>
+</form>
+{% if is_paginated %}
+<div class="pagination">
+  <span class="step-link">
+    {% if page_obj.has_previous %}
+    <a href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">previous</a>
+    {% endif %}
+    <span class="page-current">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?{{ query_string }}&page={{ page_obj.next_page_number }}">next</a>
+    {% endif %}
+  </span>
+</div>
+{% else %}
+<br>
+{% endif %}
+<table class="table table-bordered table-striped">
+  <tr>
+    <th class="text-center bg-info">勘定科目名</th>
+    <th class="text-center bg-info">勘定科目種類</th>
+    <th class="text-center bg-info">処理</th>
+  </tr>
+  {% for item in object_list %}
+  <tr>
+    <td><a href="/app/at/edit/{{ item.id }}">{{ item.at_name }}</td>
+    <td>
+      {% ifequal item.at_type "0" %}
+      資産
+      {% else %}{% ifequal item.at_type "1" %}
+      負債
+      {% else %}{% ifequal item.at_type "2" %}
+      資本
+      {% else %}{% ifequal item.at_type "3" %}
+      収益
+      {% else %}
+      費用
+      {% endifequal %}{% endifequal %}{% endifequal %}{% endifequal %}
+    </td>
+    <td>
+      <button type="submit" class="btn btn-info input form-control" 
+	      onClick="location.href='/app/at/delete/{{ item.id  }}'">
+	削除
+      </button>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

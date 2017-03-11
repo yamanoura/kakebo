@@ -1,0 +1,118 @@
+{% extends 'common/base.html' %}
+{% load bootstrap %}
+
+{% block title %}Project情報検索{% endblock %}
+
+{% block page_name %}
+Project情報検索
+{% endblock %}
+
+{% block page_desc %}
+Project情報の検索を行う
+{% endblock %}
+
+{% block main %}
+<form method="get" action="" name="filter_form">
+  {% csrf_token %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	PJ名：
+      </div>
+      <div class="col-xs-8 col-sm-10">
+	<input id="search_project_name" name="search_project_name" placeholder="Project名" type="text" class="form-control" value="{{ search_project_name  }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	PJ説明：
+      </div>
+      <div class="col-xs-8 col-sm-10">
+	<input id="search_project_desc" name="search_project_desc" placeholder="Project説明" type="text" class="form-control" value="{{ search_project_desc  }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	PJ状態：
+      </div>
+      <div class="col-xs-8 col-sm-10 text-left">
+	<SELECT ID="search_project_status" name="search_project_status" class="form-control">
+	  <OPTION VALUE="" 
+		  {% ifequal search_project_status "" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >---------</OPTION>
+	  <OPTION VALUE="0"
+		  {% ifequal search_project_status "0" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >利用中</OPTION>
+	  <OPTION VALUE="1"
+		  {% ifequal search_project_status "1" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >完了済</OPTION>
+	  <OPTION VALUE="9"
+		  {% ifequal search_project_status "9" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >削除済</OPTION>
+	</SELECT>
+      </div>
+    </div>
+    <div class="row">      
+      <div class="col-xs-12 col-sm-12 text-left">
+	<button type="submit" class="btn btn-primary input-lg form-control">
+	  検索
+	</button>
+      </div>
+    </div>
+  </div>
+</form>
+{% if is_paginated %}
+<div class="pagination">
+  <span class="step-link">
+    {% if page_obj.has_previous %}
+    <a href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">previous</a>
+    {% endif %}
+    <span class="page-current">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?{{ query_string }}&page={{ page_obj.next_page_number }}">next</a>
+    {% endif %}
+  </span>
+</div>
+{% else %}
+<br>
+{% endif %}
+<table class="table table-bordered table-striped">
+  <tr>
+    <th class="text-center bg-info">PJ名</th>
+    <th class="text-center bg-info">PJ説明</th>
+    <th class="text-center bg-info">PJ状況</th>
+    <th class="text-center bg-info">処理</th>
+  </tr>
+  {% for item in object_list %}
+  <tr>
+    <td><a href="/kakbapp/project/edit/{{ item.id }}">{{ item.project_name }}</td>
+    <td>{{ item.project_desc }}</td>
+    <td>
+      {% ifequal item.project_status "0" %}
+      利用中
+      {% else %}{% ifequal item.project_status "1" %}
+      完了済
+      {% else %}
+      削除済
+      {% endifequal %}{% endifequal %}
+    </td>
+    <td>
+      <button type="submit" class="btn btn-info input form-control" 
+	      onClick="location.href='/kakbapp/project/delete/{{ item.id  }}'">
+	削除
+      </button>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
