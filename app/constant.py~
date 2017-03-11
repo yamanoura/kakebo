@@ -1,0 +1,28 @@
+#coding=UTF8
+import sys
+
+PROJECT_STATUS = (
+    ('0',u'計画中'),
+    ('1',u'利用中'),
+    ('2',u'完了済'),
+    ('9',u'削除済'),
+)
+
+ACCOUNT_TITLE_TYPE_DEFINE = (
+    ('0',u'入金'),
+    ('1',u'出勤'),
+)
+    ('1',u'出勤'),
+)
+
+EXPENSE_METHOD_TYPE_DEFINE = (
+    ('0',u'現金'),
+    ('1',u'クレジット'),
+    ('2',u'振込'),
+    ('3',u'口座振替'),
+)
+
+EXPENSE_ANALYSIS_TYPE_DEFINE = (
+    ('0',u'支出要'),
+    ('1',u'支出不要'),
+)

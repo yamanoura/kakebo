@@ -1,0 +1,91 @@
+from django.conf.urls import url
+
+from . import views
+from .forms import *
+from .models import *
+
+APP_NAME = 'kakbapp'
+
+urlpatterns = [
+    #BaseCreateView
+    url(r'^project/add$', views.BaseCreateView.as_view(model=Project,form_class=ProjectForm),
+        name='project_add'),
+    url(r'^expense/add$', views.BaseCreateView.as_view(model=Expense,form_class=ExpenseForm),
+        name='expense_add'),
+    url(r'^revenue/add$', views.BaseCreateView.as_view(model=Revenue,form_class=RevenueForm),
+        name='revenue_add'),
+    url(r'^at/add$', views.BaseCreateView.as_view(template_name='%s/at_form.html' % APP_NAME,
+                                                  model=AccountTitle,
+                                                  form_class=AccountTitleForm),
+        name='at_add'),
+    url(r'^ba/add$', views.BaseCreateView.as_view(template_name='%s/ba_form.html' % APP_NAME,
+                                                  model=BankAccount,
+                                                  form_class=BankAccountForm),
+        name='ba_add'),
+    url(r'^em/add$', views.BaseCreateView.as_view(template_name='%s/em_form.html' % APP_NAME,
+                                                  model=ExpenseMethod,
+                                                  form_class=ExpenseMethodForm),
+        name='em_add'),
+
+    #BaseUpdateView
+    url(r'^project/edit/(?P<pk>\d+)$', 
+        views.BaseUpdateView.as_view(model=Project,form_class=ProjectForm),
+        name='project_edit'),
+    url(r'^expense/edit/(?P<pk>\d+)$', views.BaseUpdateView.as_view(model=Expense,
+                                                                    form_class=ExpenseForm),
+        name='expense_edit'),
+    url(r'^revenue/edit/(?P<pk>\d+)$', views.BaseUpdateView.as_view(model=Revenue,
+                                                                    form_class=RevenueForm),
+        name='revenue_edit'),
+    url(r'^at/edit/(?P<pk>\d+)$',
+        views.BaseUpdateView.as_view(template_name='%s/at_form.html' % APP_NAME,
+                                     model=AccountTitle,
+                                     form_class=AccountTitleForm),
+        name='at_edit'),
+    url(r'^ba/edit/(?P<pk>\d+)$',
+        views.BaseUpdateView.as_view(template_name='%s/ba_form.html' % APP_NAME,
+                                     model=BankAccount,
+                                     form_class=BankAccountForm),
+        name='ba_edit'),
+    url(r'^em/edit/(?P<pk>\d+)$',
+        views.BaseUpdateView.as_view(template_name='%s/em_form.html' % APP_NAME,
+                                     model=ExpenseMethod,
+                                     form_class=ExpenseMethodForm),
+        name='em_edit'),
+    #BaseDeleteView
+    url(r'^project/delete/(?P<pk>\d+)$', 
+        views.BaseDeleteView.as_view(model=Project),
+        name='project_delete'),
+    url(r'^at/delete/(?P<pk>\d+)$', 
+        views.BaseDeleteView.as_view(model=AccountTitle,
+                                     template_name='%s/at_confirm_delete.html' % APP_NAME),
+        name='at_delete'),
+    url(r'^em/delete/(?P<pk>\d+)$', 
+        views.BaseDeleteView.as_view(model=ExpenseMethod,
+                                     template_name='%s/em_confirm_delete.html' % APP_NAME),
+        name='em_delete'),
+    url(r'^expense/delete/(?P<pk>\d+)$', 
+        views.BaseDeleteView.as_view(model=Expense,
+                                     template_name='%s/expense_confirm_delete.html' % APP_NAME),
+        name='expense_delete'),
+    url(r'^revenue/delete/(?P<pk>\d+)$', 
+        views.BaseDeleteView.as_view(model=Revenue,
+                                     template_name='%s/revenue_confirm_delete.html' % APP_NAME),
+        name='revenue_delete'),
+
+    url(r'^ba/delete/(?P<pk>\d+)$', 
+        views.BaseDeleteView.as_view(model=BankAccount,
+                                     template_name='%s/ba_confirm_delete.html' % APP_NAME),
+        name='ba_delete'),
+    #BaseListView
+
+    url(r'^expense/search$', views.ExpenseSearch.as_view(),name='expense_search'),
+    url(r'^revenue/search$', views.RevenueSearch.as_view(template_name='%s/revenue_list.html' % APP_NAME),
+        name='revenue_search'),
+
+    url(r'^project/search$', views.ProjectSearch.as_view(template_name='%s/project_list.html' % APP_NAME),name='project_search'),
+    url(r'^at/search$', views.AccountTitleSearch.as_view(template_name='%s/at_list.html' % APP_NAME),name='at_search'),
+    url(r'^ba/search$', views.BankAccountSearch.as_view(template_name='%s/ba_list.html' % APP_NAME),name='ba_search'),
+    url(r'^em/search$', views.ExpenseMethodSearch.as_view(template_name='%s/em_list.html' % APP_NAME),name='em_search'),
+
+]

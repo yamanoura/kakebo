@@ -1,0 +1,143 @@
+{% load staticfiles %} 
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'sidr-2.2.1/dist/stylesheets/jquery.sidr.dark.css' %}">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">  
+    <link rel="stylesheet" href="{% static 'meanMenu/meanmenu.css' %}">
+    <script type="text/javascript" src="{% static 'sidr-2.2.1/jquery.sidr.min.js' %}"></script>
+  </head>
+  <body>
+    {% if is_logined %}
+    <div hidden>
+      <div id="meanmenu">
+	<nav>
+	  <ul>
+	    <li><a href="#">Project情報</a>
+	      <ul>
+		<li><a href="/app/project/add">Project登録</a></li>
+		<li><a href="/app/project/search">Project修正</a></li>
+	      </ul>
+	    </li>
+	    <li><a href="#">マスタ保守</a>
+	      <ul>
+		<li><a href="/kakbapp/at/add">勘定科目登録</a></li>
+		<li><a href="/kakbapp/at/search">勘定科目修正</a></li>
+	      </ul>
+	    </li>
+	    <li><a href="#">設定</a>
+	      <ul>
+		<li><a href="#">パスワード変更</a></li>
+	      </ul>
+	    </li>
+	    <li><a href="/common/logout">ログアウト</a></li>
+	  </ul>
+	</nav>
+      </div>
+    </div>
+    {% endif %}
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12">
+	  <h3 class="text-center">
+	    {% block page_name %}
+	    {% endblock %}
+	  </h2>
+	</div>
+      </div>
+      <div class="row">
+	<div class="col-xs-12 text-center">
+	  {% block page_desc %}
+	  {% endblock %}
+	</div>
+      </div>
+    </div>
+    <br>
+    <div class="container-fluid">
+      <div class="row">
+	{% if is_logined %}
+	<div class="col-sm-10 col-xs-12 text-center">
+	{% else %}
+	<div class="col-sm-12 col-xs-12 text-center">
+	{% endif %}	
+	{% block main %}
+	{% endblock %}
+	</div>
+	{% if is_logined %}
+	<div class="col-sm-2 hidden-xs">
+	  <div class="panel-group" id="accordion">
+	    <div class="panel panel-primary">
+	      <div class="panel-heading">
+		<h4 class="panel-title">
+		  <div data-toggle="collapse" data-parent="#accordion">
+		    メニュー
+		  </div>
+		</h4>
+	      </div>
+	    </div>
+	    <div class="panel panel-default">
+	      <div class="panel-heading">
+		<h4 class="panel-title">
+		  <a data-toggle="collapse" data-parent="#accordion" href="#menu_project">
+		    Project情報
+		  </a>
+		</h4>
+	      </div>
+	      <div id="menu_project" class="panel-collapse collapse">
+		<div class="panel-body">
+		  <a href="/app/project/add">Project情報登録</a>
+		  <a href="/app/project/search">Project情報修正</a>
+		</div>
+	      </div>
+	    </div>
+	    <div class="panel panel-default">
+	      <div class="panel-heading">
+		<h4 class="panel-title">
+		  <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+		    設定
+		  </a>
+		</h4>
+	      </div>
+	      <div id="collapseThree" class="panel-collapse collapse">
+		<div class="panel-body">
+		  <a href="/common/password/edit">パスワード変更</a>
+		  <a href="/common/logout">ログアウト</a>
+		</div>
+	      </div>
+	    </div>
+	    <div class="panel panel-default">
+	      <div class="panel-heading">
+		<h4 class="panel-title">
+		  <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
+		    マスタ保守
+		  </a>
+		</h4>
+	      </div>
+	      <div id="collapseFour" class="panel-collapse collapse">
+		<div class="panel-body">
+		  <a href="/app/at/add">勘定科目登録</a>
+		  <a href="/app/at/search">勘定科目修正</a>
+		</div>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	{% endif %}
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="{% static 'sidr-2.2.1/dist/jquery.sidr.min.js' %}"></script>
+    <script src="{% static 'meanMenu/jquery.meanmenu.min.js' %}" type="text/javascript"></script>
+    <script type="text/javascript">
+      jQuery(document).ready(function () {
+      jQuery('#meanmenu nav').meanmenu({
+      });
+      });
+    </script>
+  </body>
+</html>

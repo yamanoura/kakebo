@@ -46,12 +46,15 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'common.apps.CommonConfig',
+    'app.apps.AppConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'bootstrapform',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -70,7 +73,12 @@ ROOT_URLCONF = 'kakebo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        #del-start yama
+        #'DIRS': [],
+        #del-end yama
+        #add-start yama
+        'DIRS': ['kakebo/templates'],
+        #add-end yama
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -151,3 +159,14 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 
 STATIC_URL = '/static/'
+
+#add-start yama
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static"),
+)
+#add-end yama
+
+#add-start yama
+LOGIN_REDIRECT_URL = '/common/mypage'
+LOGIN_URL = '/common/login'
+#add-end yama

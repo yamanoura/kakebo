@@ -8,3 +8,4 @@ pickleshare==0.6
 psycopg2
 wheel==0.29.0
 whitenoise==2.0.6
+django-bootstrap-form==3.2.1

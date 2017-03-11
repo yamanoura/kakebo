@@ -1,0 +1,55 @@
+{% extends 'common/base.html' %}
+
+{% block title %}Login Page{% endblock %}
+
+{% block header_menu %}
+<div id="gnavi" class="collapse navbar-collapse">
+  <ul class="nav navbar-nav navbar-right">
+  </ul>
+</div>
+{% endblock %}
+
+{% block page_name %}
+Login Page
+{% endblock %}
+
+{% block page_desc %}
+kakb（家計簿）は、「家計簿の記入の手間を減らし、出費を把握したい！」ので作りました。
+{% endblock %}
+
+{% block main %}
+{% if form.errors %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 bg-warning text-center" style="">
+      <p class="text-warning bg-warning">IDとパスワードの組み合わせに誤りがあります</p>
+    </div>
+  </div>
+</div>
+{% endif %}
+<br>
+<form method="post" action="{% url 'django.contrib.auth.views.login' %}">
+  {% csrf_token %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-sm-6">
+	<input id="id_username" name="username" placeholder="ID" type="text" class="form-control input-lg">
+      </div>
+      <div class="col-xs-12 col-sm-6">
+	  <input id="id_password" name="password" placeholder="password" type="password" class="form-control input-lg">
+      </div>
+    </div>
+  </div>
+  <br>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+	<input type="submit" value="ログイン" class="form-control input-lg">
+      </div>
+    </div>
+  </div>
+
+  <input type="hidden" name="next" value="{{ next }}" />
+
+</form>
+{% endblock %}

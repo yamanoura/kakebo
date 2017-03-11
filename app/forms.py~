@@ -1,0 +1,74 @@
+#coding=UTF8
+from django import forms
+from django.forms import ModelForm,DateInput
+from kakbapp.models import *
+
+from .constant import *
+
+class ProjectForm(ModelForm):
+    class Meta:
+        model = Project
+        fields = ("project_name",
+                  "project_desc",
+                  "project_status")
+
+class ExpenseForm(ModelForm):
+    class Meta:
+        model = Expense
+        fields = ("expense_date",
+                  "at",
+                  "atd",
+                  "em",
+                  "expense_analysis_type",
+                  "expense_money",
+                  "expense_desc")
+
+        widgets = {
+            'expense_date': DateInput(attrs={"type":"date"}),
+        }
+
+    at = forms.ModelChoiceField(
+        queryset=AccountTitle.objects.filter(at_type='4'),
+        label=u"勘定科目名"
+    )
+
+
+class RevenueForm(ModelForm):
+    class Meta:
+        model = Revenue
+        fields = ("revenue_date",
+                  "at",
+                  "atd",
+                  "revenue_money",
+                  "revenue_desc")
+
+        widgets = {
+            'revenue_date': DateInput(attrs={"type":"date"}),
+        }
+
+    at = forms.ModelChoiceField(
+        queryset=AccountTitle.objects.filter(at_type='0'),
+        label=u"勘定科目名"
+    )
+
+
+
+class AccountTitleForm(ModelForm):
+    class Meta:
+        model = AccountTitle
+        fields = ("at_name",
+                  "at_type",
+                  )
+
+class BankAccountForm(ModelForm):
+    class Meta:
+        model = BankAccount
+        fields = ("ba_name",)
+
+class ExpenseMethodForm(ModelForm):
+    class Meta:
+        model = ExpenseMethod
+        fields = ("em_name",
+                  "expense_method_type",
+                  "ba",
+)
