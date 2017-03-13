@@ -1,0 +1,69 @@
+{% extends 'common/base.html' %}
+{% load bootstrap %}
+
+{% block title %}銀行口座検索{% endblock %}
+
+{% block page_name %}
+銀行口座検索
+{% endblock %}
+
+{% block page_desc %}
+銀行口座の検索を行う
+{% endblock %}
+
+{% block main %}
+<form method="get" action="" name="filter_form">
+  {% csrf_token %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	銀行口座名：
+      </div>
+      <div class="col-xs-8 col-sm-10">
+	<input id="search_ba_name" name="search_ba_name" type="text" class="form-control" value="{{ search_ba_name }}">
+      </div>
+    </div>
+    <div class="row">      
+      <div class="col-xs-12 col-sm-12 text-left">
+	<button type="submit" class="btn btn-primary input-lg form-control">
+	  検索
+	</button>
+      </div>
+    </div>
+  </div>
+</form>
+{% if is_paginated %}
+<div class="pagination">
+  <span class="step-link">
+    {% if page_obj.has_previous %}
+    <a href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">previous</a>
+    {% endif %}
+    <span class="page-current">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?{{ query_string }}&page={{ page_obj.next_page_number }}">next</a>
+    {% endif %}
+  </span>
+</div>
+{% else %}
+<br>
+{% endif %}
+<table class="table table-bordered table-striped">
+  <tr>
+    <th class="text-center bg-info">銀行口座名</th>
+    <th class="text-center bg-info">処理</th>
+  </tr>
+  {% for item in object_list %}
+  <tr>
+    <td><a href="/kakbapp/ba/edit/{{ item.id }}">{{ item.ba_name }}</td>
+    <td>
+      <button type="submit" class="btn btn-info input form-control" 
+	      onClick="location.href='/kakbapp/ba/delete/{{ item.id  }}'">
+	削除
+      </button>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -33,3 +33,81 @@ class AccountTitle(models.Model):
 
     def __unicode__(self):
         return u"{}".format(self.at_name)
+
+#銀行口座
+class BankAccount(models.Model):
+    user = models.ForeignKey(User)
+    ba_name = models.CharField(u'銀行口座名',max_length=100)
+
+    def __str__(self):
+        return self.ba_name
+
+    def __unicode__(self):
+        return u"{}".format(self.ba_name)
+
+#収入支出方法
+class DepositWithdrawalMethod(models.Model):
+    user = models.ForeignKey(User)
+    dwm_name = models.CharField(u'入出金方法名',max_length=50)
+    dwm_type = models.CharField(u'入出金方法種類',
+                                           max_length=1,
+                                           default=0,
+                                           blank=True,
+                                           null=True,
+                                           choices=DEPOSIT_WITHDRAWAL_METHOD_TYPE_DEFINE)
+
+    ba =  models.ForeignKey(BankAccount,
+                            models.SET_NULL,
+                            blank=True,
+                            null=True,
+                            verbose_name=u'銀行口座名'
+    )
+
+    def __str__(self):
+        return self.dwm_name
+    
+    def __unicode__(self):
+        return u"{}".format(self.dwm_name)
+
+#帳簿
+class AccountBook(models.Model):
+    user = models.ForeignKey(User)
+    trade_date = models.DateField(u'取引日',
+                                    blank=True,
+                                    null=True,
+                                    default=timezone.now())    
+
+    dw_type = models.CharField(u'入出金種類',
+                               max_length=1,
+                               default=1,
+                               choices=DEPOSIT_WITHDRAWAL_TYPE_DEFINE)
+
+    at   = models.ForeignKey(AccountTitle,
+                             verbose_name=u'勘定科目'
+    )
+
+    dwm   = models.ForeignKey(DepositWithdrawalMethod,
+                            models.SET_NULL,
+                            blank=True,
+                            null=True,
+                            verbose_name=u'入出金方法'
+    )
+
+    project = models.ForeignKey(Project,
+                            models.SET_NULL,
+                            blank=True,
+                            null=True,
+                            verbose_name=u'Project情報'
+    )
+
+    ab_desc = models.CharField(u'帳簿摘要',max_length=100)
+    ab_money = models.IntegerField(u'帳簿金額',
+                                        validators=[MinValueValidator(1), MaxValueValidator(99999999)]
+    )
+    
+    def __str__(self):
+        return self.ab_desc
+
+    def __unicode__(self):
+        return u"{}".format(self.ab_desc)
+    

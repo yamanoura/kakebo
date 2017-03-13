@@ -23,10 +23,20 @@
 		<li><a href="/app/project/search">Project修正</a></li>
 	      </ul>
 	    </li>
+	    <li><a href="#">帳簿情報</a>
+	      <ul>
+		<li><a href="/app/ab/add">帳簿登録</a></li>
+		<li><a href="/app/ab/search">帳簿修正</a></li>
+	      </ul>
+	    </li>
 	    <li><a href="#">マスタ保守</a>
 	      <ul>
 		<li><a href="/app/at/add">勘定科目登録</a></li>
 		<li><a href="/app/at/search">勘定科目修正</a></li>
+		<li><a href="/app/ba/add">銀行口座登録</a></li>
+		<li><a href="/app/ba/search">銀行口座修正</a></li>
+		<li><a href="/app/dwm/add">支出収入方法登録</a></li>
+		<li><a href="/app/dwm/search">支出収入方法修正</a></li>
 	      </ul>
 	    </li>
 	    <li><a href="#">設定</a>
@@ -97,6 +107,22 @@
 	    <div class="panel panel-default">
 	      <div class="panel-heading">
 		<h4 class="panel-title">
+		  <a data-toggle="collapse" data-parent="#accordion" href="#menu_ab">
+		    帳簿情報
+		  </a>
+		</h4>
+	      </div>
+	      <div id="menu_ab" class="panel-collapse collapse">
+		<div class="panel-body">
+		  <a href="/app/ab_d/add">入金情報登録</a>
+		  <a href="/app/ab_w/add">出金情報登録</a>
+		  <a href="/app/ab/search">帳簿修正</a>
+		</div>
+	      </div>
+	    </div>
+	    <div class="panel panel-default">
+	      <div class="panel-heading">
+		<h4 class="panel-title">
 		  <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
 		    設定
 		  </a>
@@ -121,6 +147,10 @@
 		<div class="panel-body">
 		  <a href="/app/at/add">勘定科目登録</a>
 		  <a href="/app/at/search">勘定科目修正</a>
+		  <a href="/app/ba/add">銀行口座登録</a>
+		  <a href="/app/ba/search">銀行口座修正</a>
+		  <a href="/app/dwm/add">入出金方法登録</a>
+		  <a href="/app/dwm/search">入出金方法修正</a>
 		</div>
 	      </div>
 	    </div>

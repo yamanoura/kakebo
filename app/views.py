@@ -48,6 +48,12 @@ class BaseCreateView(BaseView,CreateView):
         ctx['is_addmode'] = True
         return ctx
 
+    def get_form_kwargs(self):
+        class_object = self.get_object()
+        kwargs = super(BaseCreateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+        
 class BaseUpdateView(UpdateView):
     success_url = SUCCESS_URL
 
@@ -68,6 +74,12 @@ class BaseUpdateView(UpdateView):
         ctx['is_logined'] = True
         ctx['is_addmode'] = False
         return ctx
+
+    def get_form_kwargs(self):
+        class_object = self.get_object()
+        kwargs = super(BaseUpdateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
 class BaseDeleteView(DeleteView):
     success_url = SUCCESS_URL
@@ -120,9 +132,10 @@ class ProjectSearch(ListView):
         if request_project_name is not None and \
            request_project_desc is not None and \
            request_project_status is not None:
-            project =  Project.objects.filter(project_name__contains=request_project_name,
-                                          project_desc__contains=request_project_desc,
-                                          project_status__contains=request_project_status
+            project =  Project.objects.filter(user=self.request.user,
+                                              project_name__contains=request_project_name,
+                                              project_desc__contains=request_project_desc,
+                                              project_status__contains=request_project_status
 	    )
 
             return project
@@ -155,7 +168,95 @@ class AccountTitleSearch(ListView):
         if request_at_name is not None and \
            request_at_type is not None:
             if request_at_type == "":
-                return AccountTitle.objects.filter(at_name__contains=request_at_name)
+                return AccountTitle.objects.filter(user=self.request.user,
+                                                   at_name__contains=request_at_name)
             else:
-                return AccountTitle.objects.filter(at_name__contains=request_at_name,at_type=request_at_type)
+                return AccountTitle.objects.filter(user=self.request.user,
+                                                   at_name__contains=request_at_name,
+                                                   at_type=request_at_type)
+
+class BankAccountSearch(ListView):
+    model = BankAccount
+    paginate_by = 5
+
+    def dispatch(self,request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/common/login/?next=%s' % request.path)
+        else:
+            return super(BankAccountSearch, self).dispatch(request,*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super(BankAccountSearch,self).get_context_data(**kwargs)
+
+        ctx['search_ba_name']   = self.request.GET.get('search_ba_name','')
+
+        ctx['is_logined'] = True
+        ctx['query_string'] = self.request.GET.urlencode()
+
+        return ctx
+
+    def get_queryset(self):
+        request_ba_name = self.request.GET.get('search_ba_name','')
+
+        if request_ba_name is not None:
+            return BankAccount.objects.filter(user=self.request.user,
+                                              ba_name__contains=request_ba_name)
+
+
+class DepositWithdrawalMethodSearch(ListView):
+    model = DepositWithdrawalMethod
+    paginate_by = 5
+
+    def dispatch(self,request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/common/login/?next=%s' % request.path)
+        else:
+            return super(DepositWithdrawalMethodSearch, self).dispatch(request,*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super(DepositWithdrawalMethodSearch,self).get_context_data(**kwargs)
+
+        ctx['search_dwm_name']   = self.request.GET.get('search_dwm_name','')
+
+        ctx['is_logined'] = True
+        ctx['query_string'] = self.request.GET.urlencode()
+
+        return ctx
+
+    def get_queryset(self):
+        request_dwm_name = self.request.GET.get('search_dwm_name','')
+
+        if request_dwm_name is not None:
+            return DepositWithdrawalMethod.objects.filter(user=self.request.user,
+                                                          dwm_name__contains=request_dwm_name)
+
+
+class AccountBookSearch(ListView):
+    model = AccountBook
+    paginate_by = 5
+
+    def dispatch(self,request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/common/login/?next=%s' % request.path)
+        else:
+            return super(AccountBookSearch, self).dispatch(request,*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super(AccountBookSearch,self).get_context_data(**kwargs)
+
+        ctx['search_trade_date']   = self.request.GET.get('search_trade_date','')
+        ctx['search_ab_desc']   = self.request.GET.get('search_ab_desc','')
+
+        ctx['is_logined'] = True
+        ctx['query_string'] = self.request.GET.urlencode()
+
+        return ctx
+
+    def get_queryset(self):
+        request_trade_date = self.request.GET.get('search_trade_date','')
+        request_ab_desc = self.request.GET.get('search_ab_desc','')
+
+        if request_ab_desc is not None:
+            return AccountBook.objects.filter(user=self.request.user,
+                                              ab_desc__contains=request_ab_desc)
 

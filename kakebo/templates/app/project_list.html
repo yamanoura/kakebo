@@ -52,11 +52,6 @@ Project情報の検索を行う
 		  selected="selected"
 		  {% endifequal %}
 		  >完了済</OPTION>
-	  <OPTION VALUE="9"
-		  {% ifequal search_project_status "9" %}
-		  selected="selected"
-		  {% endifequal %}
-		  >削除済</OPTION>
 	</SELECT>
       </div>
     </div>
@@ -100,11 +95,9 @@ Project情報の検索を行う
     <td>
       {% ifequal item.project_status "0" %}
       利用中
-      {% else %}{% ifequal item.project_status "1" %}
-      完了済
       {% else %}
-      削除済
-      {% endifequal %}{% endifequal %}
+      完了済
+      {% endifequal %}
     </td>
     <td>
       <button type="submit" class="btn btn-info input form-control" 

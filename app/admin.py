@@ -5,3 +5,6 @@ from .models import *
 
 admin.site.register(Project)
 admin.site.register(AccountTitle)
+admin.site.register(AccountBook)
+admin.site.register(BankAccount)
+admin.site.register(DepositWithdrawalMethod)
