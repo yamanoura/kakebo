@@ -60,6 +60,7 @@
 <table class="table table-bordered table-striped">
   <tr>
     <th class="text-center bg-info">取引日</th>
+    <th class="text-center bg-info">入出金種類</th>
     <th class="text-center bg-info">科目</th>
     <th class="text-center bg-info">摘要</th>
     <th class="text-center bg-info">金額</th>
@@ -68,8 +69,21 @@
   {% for item in object_list %}
   <tr>
     <td>{{ item.trade_date  }}</td>
+    <td>
+      {% ifequal item.dw_type "0" %}
+      入金
+      {% else %}
+      出金
+      {% endifequal %}
+    </td>
     <td>{{ item.at  }}</td>
-    <td><a href="/app/ab/edit/{{ item.id }}">{{ item.ab_desc }}</td>
+    <td>
+      {% ifequal item.dw_type "0" %}
+      <a href="/app/ab_d/edit/{{ item.id }}">{{ item.ab_desc }}
+      {% else %}
+      <a href="/app/ab_w/edit/{{ item.id }}">{{ item.ab_desc }}
+      {% endifequal %}
+    </td>
     <td>{{ item.ab_money  }}</td>
     <td>
       <button type="submit" class="btn btn-info input form-control" 

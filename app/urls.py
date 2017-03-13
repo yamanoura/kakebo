@@ -13,16 +13,16 @@ urlpatterns = [
         name='project_add'),
 
     #入金用
-    url(r'^ab_d/add$', views.BaseCreateView.as_view(template_name='%s/ab_form.html' % APP_NAME,
+    url(r'^ab_d/add$', views.BaseCreateView.as_view(template_name='%s/ab_d_form.html' % APP_NAME,
                                                   model=AccountBook,
                                                   form_class=AccountBookDepositForm),
         name='ab_d_add'),
 
     #出金用
-    url(r'^ab_w/add$', views.BaseCreateView.as_view(template_name='%s/ab_form.html' % APP_NAME,
+    url(r'^ab_w/add$', views.BaseCreateView.as_view(template_name='%s/ab_w_form.html' % APP_NAME,
                                                   model=AccountBook,
                                                   form_class=AccountBookWithdrawalForm),
-        name='ab_add'),
+        name='ab_w_add'),
 
     url(r'^at/add$', views.BaseCreateView.as_view(template_name='%s/at_form.html' % APP_NAME,
                                                   model=AccountTitle,
@@ -44,17 +44,17 @@ urlpatterns = [
 
     #入金用
     url(r'^ab_d/edit/(?P<pk>\d+)$',
-        views.BaseUpdateView.as_view(template_name='%s/ab_form.html' % APP_NAME,
+        views.BaseUpdateView.as_view(template_name='%s/ab_d_form.html' % APP_NAME,
                                      model=AccountBook,
                                      form_class=AccountBookDepositForm),
-        name='ab_edit'),
+        name='ab_d_edit'),
 
     #出金用
     url(r'^ab_w/edit/(?P<pk>\d+)$',
-        views.BaseUpdateView.as_view(template_name='%s/ab_form.html' % APP_NAME,
+        views.BaseUpdateView.as_view(template_name='%s/ab_w_form.html' % APP_NAME,
                                      model=AccountBook,
                                      form_class=AccountBookWithdrawalForm),
-        name='ab_edit'),
+        name='ab_w_edit'),
 
 
     url(r'^at/edit/(?P<pk>\d+)$',

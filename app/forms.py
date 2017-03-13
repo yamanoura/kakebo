@@ -68,6 +68,7 @@ class AccountBookDepositForm(ModelForm):
         self.user = kwargs.pop('user')
         super(AccountBookDepositForm, self).__init__(*args, **kwargs)
         self.fields["dw_type"].initial = '0'
+        self.fields["dw_type"].widget = forms.HiddenInput()
         self.fields["at"].queryset = AccountTitle.objects.filter(user=self.user)
         self.fields["dwm"].queryset = DepositWithdrawalMethod.objects.filter(user=self.user)
         self.fields["project"].queryset = Project.objects.filter(user=self.user,project_status='0')
@@ -89,6 +90,8 @@ class AccountBookWithdrawalForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
         super(AccountBookWithdrawalForm, self).__init__(*args, **kwargs)
+        self.fields["dw_type"].initial = '1'
+        self.fields["dw_type"].widget = forms.HiddenInput()
         self.fields["at"].queryset = AccountTitle.objects.filter(user=self.user)
         self.fields["dwm"].queryset = DepositWithdrawalMethod.objects.filter(user=self.user)
         self.fields["project"].queryset = Project.objects.filter(user=self.user,project_status='0')
