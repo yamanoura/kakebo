@@ -1,3 +1,4 @@
+#coding=UTF8
 from django.shortcuts import render
 
 # Create your views here.
@@ -57,10 +58,20 @@ class BaseCreateView(BaseView,CreateView):
 class BaseUpdateView(UpdateView):
     success_url = SUCCESS_URL
 
+    def get_object(self, **kwargs):
+        if not hasattr(self, '_object'):
+            self._object = super(BaseUpdateView, self).get_object(**kwargs)
+
+        return self._object
+
     def dispatch(self,request, *args, **kwargs):
         if not request.user.is_authenticated():
             return HttpResponseRedirect(AUTH_FAILURE % request.path)
         else:
+            buv = self.get_object()
+            if buv.user.id != request.user.id:
+                return HttpResponseRedirect(SUCCESS_URL)
+
             return super(BaseUpdateView, self).dispatch(request,*args, **kwargs)
 
     def form_valid(self, form):
