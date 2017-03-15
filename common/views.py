@@ -20,8 +20,10 @@ class MyPage(ListView):
         return Menu.objects.all()
 
     def get_context_data(self, **kwargs):
-        return {
-            'is_logined':True
-}
+        ctx = super(MyPage,self).get_context_data(**kwargs)
+        ctx['is_logined'] = True
+        ctx['userid']   = self.request.user
+
+        return ctx
 
 

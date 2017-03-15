@@ -47,6 +47,7 @@ class BaseCreateView(BaseView,CreateView):
         ctx = super(BaseCreateView,self).get_context_data(**kwargs)
         ctx['is_logined'] = True
         ctx['is_addmode'] = True
+        ctx['userid']   = self.request.user
         return ctx
 
     def get_form_kwargs(self):
@@ -84,6 +85,7 @@ class BaseUpdateView(UpdateView):
         ctx = super(BaseUpdateView,self).get_context_data(**kwargs)
         ctx['is_logined'] = True
         ctx['is_addmode'] = False
+        ctx['userid']   = self.request.user
         return ctx
 
     def get_form_kwargs(self):
@@ -111,6 +113,7 @@ class BaseDeleteView(DeleteView):
         ctx = super(BaseDeleteView,self).get_context_data(**kwargs)
         ctx['is_logined'] = True
         ctx['is_addmode'] = False
+        ctx['userid']   = self.request.user
         return ctx
 
 class ProjectSearch(ListView):
@@ -132,6 +135,7 @@ class ProjectSearch(ListView):
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
 
         return ctx
 
@@ -169,6 +173,7 @@ class AccountTitleSearch(ListView):
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
 
         return ctx
 
@@ -203,6 +208,7 @@ class BankAccountSearch(ListView):
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
 
         return ctx
 
@@ -231,6 +237,7 @@ class DepositWithdrawalMethodSearch(ListView):
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
 
         return ctx
 
@@ -260,6 +267,7 @@ class AccountBookSearch(ListView):
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
 
         return ctx
 
