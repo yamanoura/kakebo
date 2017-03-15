@@ -1,0 +1,94 @@
+{% extends 'common/base.html' %}
+{% load bootstrap %}
+
+{% block title %}帳簿集計(月別){% endblock %}
+
+{% block page_name %}
+帳簿集計(月別)
+{% endblock %}
+
+{% block page_desc %}
+帳簿の集計(月別)を行う
+{% endblock %}
+
+{% block main %}
+<form method="get" action="" name="filter_form">
+  {% csrf_token %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	取引日：
+      </div>
+      <div class="col-xs-8 col-sm-10">
+	<input id="search_trade_date" name="search_trade_date" type="month" class="form-control" value="{{ search_trade_date }}">
+      </div>
+    </div>
+    <div class="row">      
+      <div class="col-xs-12 col-sm-12 text-left">
+	<button type="submit" class="btn btn-primary input-lg form-control">
+	  検索
+	</button>
+      </div>
+    </div>
+  </div>
+</form>
+{% if is_paginated %}
+<div class="pagination">
+  <span class="step-link">
+    {% if page_obj.has_previous %}
+    <a href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">previous</a>
+    {% endif %}
+    <span class="page-current">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?{{ query_string }}&page={{ page_obj.next_page_number }}">next</a>
+    {% endif %}
+  </span>
+</div>
+{% else %}
+<br>
+{% endif %}
+<table border="0" width="100%">
+  <tr>
+    <td valign="top">
+      <table class="table table-bordered table-striped">
+	<tr>
+	  <th colspan="2" class="text-center bg-primary">入金</th>
+	</tr>
+	<tr>
+	  <th class="text-center bg-info">科目</th>
+	  <th class="text-center bg-info">金額</th>
+	</tr>
+	{% for item in object_list %}
+	{% ifequal item.dw_type "0" %}
+	<tr>
+	  <td>{{ item.at_name }}</td>
+	  <td>{{ item.sum_money }}</td>
+	</tr>
+	{% endifequal %}
+	{% endfor %}
+      </table>
+    </td>
+    <td valign="top">
+      <table class="table table-bordered table-striped">
+	<tr>
+	  <th colspan="2" class="text-center bg-primary">出金</th>
+	</tr>
+	<tr>
+	  <th class="text-center bg-info">科目</th>
+	  <th class="text-center bg-info">金額</th>
+	</tr>
+	{% for item in object_list %}
+	{% ifequal item.dw_type "1" %}
+	<tr>
+	  <td>{{ item.at_name }}</td>
+	  <td>{{ item.sum_money }}</td>
+	</tr>
+	{% endifequal %}
+	{% endfor %}
+      </table>
+    </td>
+  </tr>
+</table>
+{% endblock %}

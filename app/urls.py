@@ -108,6 +108,9 @@ urlpatterns = [
     url(r'^ba/search$', views.BankAccountSearch.as_view(template_name='%s/ba_list.html' % APP_NAME),name='ba_search'),
     url(r'^dwm/search$', views.DepositWithdrawalMethodSearch.as_view(template_name='%s/dwm_list.html' % APP_NAME),name='dwm_search'),
 
+    #帳簿集計（日別）
     url(r'^ab/sum$', views.AccountBookSum.as_view(template_name='%s/ab_sum_list.html' % APP_NAME),name='ab_sum'),
+    #帳簿集計（月別）
+    url(r'^ab/sum_by_month$', views.AccountBookSumByMonth.as_view(template_name='%s/ab_sum_by_month_list.html' % APP_NAME),name='ab_sum_by_month'),
 
 ]
