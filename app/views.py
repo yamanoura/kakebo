@@ -13,6 +13,13 @@ from .models import *
 from .forms import *
 import sys
 
+# util
+import datetime
+from dateutil.relativedelta import relativedelta
+import logging
+from django.db.models import Sum
+from django.db.models import Max
+
 APP_NAME     = 'app'
 PACKAGE_NAME = 'app.views'
 SUCCESS_URL  = '/common/mypage'
@@ -278,4 +285,47 @@ class AccountBookSearch(ListView):
         if request_ab_desc is not None:
             return AccountBook.objects.filter(user=self.request.user,
                                               ab_desc__contains=request_ab_desc)
+
+
+class AccountBookSum(ListView):
+    model = AccountBook
+
+    def dispatch(self,request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/common/login/?next=%s' % request.path)
+        else:
+            return super(AccountBookSum, self).dispatch(request,*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super(AccountBookSum,self).get_context_data(**kwargs)
+
+        ctx['search_trade_date']   = self.request.GET.get('search_trade_date','')
+        ctx['search_ab_desc']   = self.request.GET.get('search_ab_desc','')
+
+        ctx['is_logined'] = True
+        ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
+
+        return ctx
+
+    def get_queryset(self):
+        request_trade_date = self.request.GET.get('search_trade_date','')
+        request_ab_desc = self.request.GET.get('search_ab_desc','')
+
+        info(request_trade_date)
+
+        if request_trade_date is not None and len(request_trade_date) <> 0:
+            today = datetime.date.today()
+            ab = AccountBook.objects.filter(user=self.request.user,
+                                            trade_date=request_trade_date)
+            info(ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type'))
+            return ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+        else:
+            return None
+
+
+def info(msg):
+    logger = logging.getLogger('command')
+    logger.info(msg)
+
 

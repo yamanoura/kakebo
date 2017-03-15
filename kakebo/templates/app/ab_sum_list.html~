@@ -20,7 +20,7 @@
 	取引日：
       </div>
       <div class="col-xs-8 col-sm-10">
-	<input id="search_trade_date" name="search_trade_date" type="date" class="form-control" value="{{ search_trade_date }}">
+	<input id="search_trade_date" name="search_trade_date" type="text" class="form-control" value="{{ search_trade_date }}">
       </div>
     </div>
     <div class="row">

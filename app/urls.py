@@ -108,4 +108,6 @@ urlpatterns = [
     url(r'^ba/search$', views.BankAccountSearch.as_view(template_name='%s/ba_list.html' % APP_NAME),name='ba_search'),
     url(r'^dwm/search$', views.DepositWithdrawalMethodSearch.as_view(template_name='%s/dwm_list.html' % APP_NAME),name='dwm_search'),
 
+    url(r'^ab/sum$', views.AccountBookSum.as_view(template_name='%s/ab_sum_list.html' % APP_NAME),name='ab_sum'),
+
 ]
