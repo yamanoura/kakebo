@@ -21,4 +21,5 @@ DEPOSIT_WITHDRAWAL_METHOD_TYPE_DEFINE = (
     ('1',u'クレジット'),
     ('2',u'振込'),
     ('3',u'口座振替'),
+    ('4',u'ポイント'),
 )
