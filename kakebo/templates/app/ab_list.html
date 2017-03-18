@@ -68,7 +68,7 @@
   </tr>
   {% for item in object_list %}
   <tr>
-    <td>{{ item.trade_date  }}</td>
+    <td>{{ item.trade_date|date:"Y-m-d"  }}</td>
     <td>
       {% ifequal item.dw_type "0" %}
       入金
