@@ -100,7 +100,10 @@ class AccountBook(models.Model):
                             verbose_name=u'Project情報'
     )
 
-    ab_desc = models.CharField(u'帳簿摘要',max_length=100)
+    ab_desc = models.CharField(u'帳簿摘要',
+                               max_length=100
+    )
+
     ab_money = models.IntegerField(u'帳簿金額',
                                         validators=[MinValueValidator(1), MaxValueValidator(99999999)]
     )

@@ -302,6 +302,22 @@ class AccountBookSum(ListView):
 
         ctx['search_trade_date']   = self.request.GET.get('search_trade_date','')
         ctx['search_ab_desc']   = self.request.GET.get('search_ab_desc','')
+        ctx['dw_0_total'] = 0
+        ctx['dw_1_total'] = 0
+
+        if ctx['search_trade_date'] is not None and len(ctx['search_trade_date']) <> 0:
+            ab = AccountBook.objects.filter(user=self.request.user,
+                                            trade_date=ctx['search_trade_date']
+            )
+
+            ab_list = ab.values('dw_type').annotate(total_money=Sum('ab_money'))
+
+            for ab_dict in ab_list:
+                #入金
+                if ab_dict['dw_type']=='0':
+                    ctx['dw_0_total']   = ab_dict['total_money']
+                else:
+                    ctx['dw_1_total']   = ab_dict['total_money']
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
@@ -336,8 +352,27 @@ class AccountBookSumByMonth(ListView):
     def get_context_data(self, **kwargs):
         ctx = super(AccountBookSumByMonth,self).get_context_data(**kwargs)
 
-        ctx['search_trade_date']   = self.request.GET.get('search_trade_date','')
+        ctx['search_trade_month']   = self.request.GET.get('search_trade_month','')
         ctx['search_ab_desc']   = self.request.GET.get('search_ab_desc','')
+
+        ctx['dw_0_total'] = 0
+        ctx['dw_1_total'] = 0
+
+        if ctx['search_trade_month'] is not None and len(ctx['search_trade_month']) <> 0:
+            first_of_thismonth =  datetime.datetime.strptime(ctx['search_trade_month'] + "-01", '%Y-%m-%d')
+            last_of_thismonth  = first_of_thismonth + relativedelta(months=1) - timedelta(days=1)
+            ab = AccountBook.objects.filter(user=self.request.user,
+                                            trade_date__range=(first_of_thismonth,last_of_thismonth))
+
+            ab_list = ab.values('dw_type').annotate(total_money=Sum('ab_money'))
+
+            for ab_dict in ab_list:
+                #入金
+                if ab_dict['dw_type']=='0':
+                    ctx['dw_0_total']   = ab_dict['total_money']
+                else:
+                    ctx['dw_1_total']   = ab_dict['total_money']
+
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
@@ -346,7 +381,7 @@ class AccountBookSumByMonth(ListView):
         return ctx
 
     def get_queryset(self):
-        request_trade_month = self.request.GET.get('search_trade_date','')
+        request_trade_month = self.request.GET.get('search_trade_month','')
         request_ab_desc = self.request.GET.get('search_ab_desc','')
 
         info(request_trade_month)
