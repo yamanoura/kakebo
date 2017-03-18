@@ -1,0 +1,34 @@
+$(function() {
+  $(document).on("keypress", "input:not(.allow_submit)", function(event) {
+    return event.which !== 13;
+  });
+});
+
+function vdate(v_date){
+    var replaced_date = v_date.replace(/-/g,'');
+    var year  = replaced_date.substr(0,4);
+    var month = replaced_date.substr(4,2);
+    var day   = replaced_date.substr(6,2);
+
+    var ymd = new Date(year,month,day);
+
+    if(
+	replaced_date.length==8 &&
+       v_date.length==10 &&
+       ymd.getFullYear()==year &&
+       ymd.getMonth()==month &&
+       ymd.getDate()==day){
+
+	return true;
+    }else{
+	return false;
+    }
+}
+
+function validate_test(){
+    alert('neko')
+}
+
+
+
+

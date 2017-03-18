@@ -12,6 +12,7 @@ from django.http import HttpResponseRedirect
 from .models import *
 from .forms import *
 import sys
+from .constant import *
 
 # util
 import datetime
@@ -300,24 +301,29 @@ class AccountBookSum(ListView):
     def get_context_data(self, **kwargs):
         ctx = super(AccountBookSum,self).get_context_data(**kwargs)
 
-        ctx['search_trade_date']   = self.request.GET.get('search_trade_date','')
+        search_trade_date = self.request.GET.get('search_trade_date','')
+
+        if search_trade_date is None or len(search_trade_date)==0:
+            ctx['search_trade_date'] = '2017-03-12' #datetime.date.today()
+        else:
+            ctx['search_trade_date']   = search_trade_date
+
         ctx['search_ab_desc']   = self.request.GET.get('search_ab_desc','')
         ctx['dw_0_total'] = 0
         ctx['dw_1_total'] = 0
 
-        if ctx['search_trade_date'] is not None and len(ctx['search_trade_date']) <> 0:
-            ab = AccountBook.objects.filter(user=self.request.user,
-                                            trade_date=ctx['search_trade_date']
-            )
+        ab = AccountBook.objects.filter(user=self.request.user,
+                                        trade_date=ctx['search_trade_date']
+        )
 
-            ab_list = ab.values('dw_type').annotate(total_money=Sum('ab_money'))
+        ab_list = ab.values('dw_type').annotate(total_money=Sum('ab_money'))
 
-            for ab_dict in ab_list:
-                #入金
-                if ab_dict['dw_type']=='0':
-                    ctx['dw_0_total']   = ab_dict['total_money']
-                else:
-                    ctx['dw_1_total']   = ab_dict['total_money']
+        for ab_dict in ab_list:
+            #入金
+            if ab_dict['dw_type']=='0':
+                ctx['dw_0_total']   = ab_dict['total_money']
+            else:
+                ctx['dw_1_total']   = ab_dict['total_money']
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
@@ -326,19 +332,15 @@ class AccountBookSum(ListView):
         return ctx
 
     def get_queryset(self):
-        request_trade_date = self.request.GET.get('search_trade_date','')
-        request_ab_desc = self.request.GET.get('search_ab_desc','')
+        search_trade_date = self.request.GET.get('search_trade_date','')
 
-        info(request_trade_date)
+        if search_trade_date is None or len(search_trade_date)==0:
+            search_trade_date = '2017-03-12' #datetime.date.today()
 
-        if request_trade_date is not None and len(request_trade_date) <> 0:
-            today = datetime.date.today()
-            ab = AccountBook.objects.filter(user=self.request.user,
-                                            trade_date=request_trade_date)
-            info(ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type'))
-            return ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
-        else:
-            return None
+        today = datetime.date.today()
+        ab = AccountBook.objects.filter(user=self.request.user,trade_date=search_trade_date)
+        return ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+
 
 class AccountBookSumByMonth(ListView):
     model = AccountBook
