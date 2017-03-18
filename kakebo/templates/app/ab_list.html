@@ -1,5 +1,6 @@
 {% extends 'common/base.html' %}
 {% load bootstrap %}
+{% load humanize %}
 
 {% block title %}帳簿情報検索{% endblock %}
 
@@ -84,7 +85,7 @@
       <a href="/app/ab_w/edit/{{ item.id }}">{{ item.ab_desc }}
       {% endifequal %}
     </td>
-    <td>{{ item.ab_money  }}</td>
+    <td>{{ item.ab_money|intcomma  }}</td>
     <td>
       <button type="submit" class="btn btn-info input form-control" 
 	      onClick="location.href='/app/ab/delete/{{ item.id  }}'">

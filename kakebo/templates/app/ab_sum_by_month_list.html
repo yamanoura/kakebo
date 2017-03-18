@@ -1,5 +1,6 @@
 {% extends 'common/base.html' %}
 {% load bootstrap %}
+{% load humanize %}
 
 {% block title %}帳簿集計(月別){% endblock %}
 
@@ -17,7 +18,7 @@
   <div class="container">
     <div class="row">
       <div class="col-xs-4 col-sm-2">
-	取引日：
+	取引年月：
       </div>
       <div class="col-xs-8 col-sm-10">
 	<input id="search_trade_month" name="search_trade_month" type="month" class="form-control" value="{{ search_trade_month }}">
@@ -64,7 +65,7 @@
 	{% ifequal item.dw_type "0" %}
 	<tr>
 	  <td>{{ item.at_name }}</td>
-	  <td>{{ item.sum_money }}</td>
+	  <td>{{ item.sum_money|intcomma }}</td>
 	</tr>
 	{% endifequal %}
 	{% endfor %}
@@ -83,7 +84,7 @@
 	{% ifequal item.dw_type "1" %}
 	<tr>
 	  <td>{{ item.at_name }}</td>
-	  <td>{{ item.sum_money }}</td>
+	  <td>{{ item.sum_money|intcomma }}</td>
 	</tr>
 	{% endifequal %}
 	{% endfor %}
@@ -95,7 +96,7 @@
       <table class="table table-bordered table-striped">
 	<tr>
 	  <th class="text-center bg-info">合計</th>
-	  <th class="text-center bg-default">{{ dw_0_total  }}</th>
+	  <th class="text-center bg-default">{{ dw_0_total|intcomma }}</th>
 	</tr>
       </table>
     </td>
@@ -103,7 +104,7 @@
       <table class="table table-bordered table-striped">
 	<tr>
 	  <th class="text-center bg-info">合計</th>
-	  <th class="text-center bg-default">{{ dw_1_total }}</th>
+	  <th class="text-center bg-default">{{ dw_1_total|intcomma }}</th>
 	</tr>
       </table>
     </td>

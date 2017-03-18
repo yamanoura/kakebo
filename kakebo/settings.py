@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bootstrapform',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -208,4 +209,9 @@ LOGGING = {
         },
     },
 }
+#add-end yama
+
+#add-start yama
+#数字のカンマ表示のための設定
+NUMBER_GROUPING = 3
 #add-end yama
