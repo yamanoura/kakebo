@@ -66,7 +66,7 @@
 	{% ifequal item.dw_type "0" %}
 	<tr>
 	  <td>{{ item.at_name }}</td>
-	  <td>{{ item.sum_money|intcomma }}</td>
+	  <td><div align="right">{{ item.sum_money|intcomma }}</div></td>
 	</tr>
 	{% endifequal %}
 	{% endfor %}
@@ -85,7 +85,7 @@
 	{% ifequal item.dw_type "1" %}
 	<tr>
 	  <td>{{ item.at_name }}</td>
-	  <td>{{ item.sum_money|intcomma }}</td>
+	  <td><div align="right">{{ item.sum_money|intcomma }}</div></td>
 	</tr>
 	{% endifequal %}
 	{% endfor %}
@@ -97,7 +97,7 @@
       <table class="table table-bordered table-striped">
 	<tr>
 	  <th class="text-center bg-info">合計</th>
-	  <th class="text-center bg-default">{{ dw_0_total|intcomma }}</th>
+	  <th class="text-center bg-default"><div align="right">{{ dw_0_total|intcomma }}</div></th>
 	</tr>
       </table>
     </td>
@@ -105,7 +105,7 @@
       <table class="table table-bordered table-striped">
 	<tr>
 	  <th class="text-center bg-info">合計</th>
-	  <th class="text-center bg-default">{{ dw_1_total|intcomma }}</th>
+	  <th class="text-center bg-default"><div align="right">{{ dw_1_total|intcomma }}</div></th>
 	</tr>
       </table>
     </td>

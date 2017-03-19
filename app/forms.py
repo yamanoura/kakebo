@@ -64,6 +64,14 @@ class AccountBookDepositForm(ModelForm):
             "ab_money",
         )
 
+        widgets = {
+            'trade_date': DateInput(attrs={"type":"date"}),
+            'ab_money': DateInput(attrs={"style":"text-align:right"}),
+        }
+
+
+
+
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
         super(AccountBookDepositForm, self).__init__(*args, **kwargs)
@@ -72,6 +80,7 @@ class AccountBookDepositForm(ModelForm):
         self.fields["at"].queryset = AccountTitle.objects.filter(user=self.user,at_type=0)
         self.fields["dwm"].queryset = DepositWithdrawalMethod.objects.filter(user=self.user)
         self.fields["project"].queryset = Project.objects.filter(user=self.user,project_status='0')
+
 
 #出金用
 class AccountBookWithdrawalForm(ModelForm):
@@ -86,6 +95,11 @@ class AccountBookWithdrawalForm(ModelForm):
                   "ab_desc",
                   "ab_money",
         )
+
+        widgets = {
+            'trade_date': DateInput(attrs={"type":"date"}),
+            'ab_money': DateInput(attrs={"style":"text-align:right"}),
+        }
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
