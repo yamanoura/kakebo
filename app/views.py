@@ -367,6 +367,11 @@ class AccountBookSumByMonth(ListView):
     def get_context_data(self, **kwargs):
         ctx = super(AccountBookSumByMonth,self).get_context_data(**kwargs)
 
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name) + '.js'
+
+        ctx['validator_name'] = validator_name
+
         search_trade_month = self.request.GET.get('search_trade_month','')
 
         if search_trade_month is None or len(search_trade_month)==0:

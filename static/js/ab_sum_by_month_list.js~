@@ -1,0 +1,14 @@
+function search(){
+    var st_month = $('#search_trade_month').val()
+
+    if(vmonth(st_month)){
+	alert('hoge');
+	var target = document.getElementByIdb("search_form");
+	alert('fuga');
+	target.method = 'get'
+	target.submit();
+    }else{
+	alert('利用できない年月が入力されました')
+    }
+}
+

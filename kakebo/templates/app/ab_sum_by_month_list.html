@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block main %}
-<form method="get" action="" name="filter_form">
+<form method="get" action="" name="search_form" id="search_form">
   {% csrf_token %}
   <div class="container">
     <div class="row">
@@ -26,7 +26,7 @@
     </div>
     <div class="row">      
       <div class="col-xs-12 col-sm-12 text-left">
-	<button type="submit" class="btn btn-primary input-lg form-control">
+	<button type="button" class="btn btn-primary input-lg form-control" onclick="search()">
 	  検索
 	</button>
       </div>

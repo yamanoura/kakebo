@@ -1,12 +1,12 @@
 function search(){
-    var st_date = $('#search_trade_date').val()
+    var st_month = $('#search_trade_month').val()
 
-    if(vdate(st_date)){
+    if(vmonth(st_month)){
 	var target = document.getElementById("search_form");
 	target.method = 'get'
 	target.submit();
     }else{
-	alert('利用できない日付が入力されました')
+	alert('利用できない年月が入力されました')
     }
 }
 
