@@ -21,6 +21,7 @@ from dateutil.relativedelta import relativedelta
 import logging
 from django.db.models import Sum
 from django.db.models import Max
+import re
 
 APP_NAME     = 'app'
 PACKAGE_NAME = 'app.views'
@@ -54,6 +55,11 @@ class BaseCreateView(BaseView,CreateView):
 
     def get_context_data(self, **kwargs):
         ctx = super(BaseCreateView,self).get_context_data(**kwargs)
+
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name) + '.js'
+
+        ctx['validator_name'] = validator_name
         ctx['is_logined'] = True
         ctx['is_addmode'] = True
         ctx['userid']   = self.request.user
@@ -301,10 +307,17 @@ class AccountBookSum(ListView):
     def get_context_data(self, **kwargs):
         ctx = super(AccountBookSum,self).get_context_data(**kwargs)
 
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name) + '.js'
+
+        ctx['validator_name'] = validator_name
+
+
         search_trade_date = self.request.GET.get('search_trade_date','')
 
         if search_trade_date is None or len(search_trade_date)==0:
-            ctx['search_trade_date'] = '2017-03-12' #datetime.date.today()
+            today = datetime.date.today().strftime('%Y-%m-%d')
+            ctx['search_trade_date'] = today
         else:
             ctx['search_trade_date']   = search_trade_date
 

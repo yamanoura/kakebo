@@ -23,7 +23,6 @@ urlpatterns = [
                                                   model=AccountBook,
                                                   form_class=AccountBookWithdrawalForm),
         name='ab_w_add'),
-
     url(r'^at/add$', views.BaseCreateView.as_view(template_name='%s/at_form.html' % APP_NAME,
                                                   model=AccountTitle,
                                                   form_class=AccountTitleForm),
