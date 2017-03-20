@@ -367,7 +367,14 @@ class AccountBookSumByMonth(ListView):
     def get_context_data(self, **kwargs):
         ctx = super(AccountBookSumByMonth,self).get_context_data(**kwargs)
 
-        ctx['search_trade_month']   = self.request.GET.get('search_trade_month','')
+        search_trade_month = self.request.GET.get('search_trade_month','')
+
+        if search_trade_month is None or len(search_trade_month)==0:
+            present_month = datetime.date.today().strftime('%Y-%m')
+            ctx['search_trade_month']   = present_month
+        else:
+            ctx['search_trade_month']   = search_trade_month
+
         ctx['search_ab_desc']   = self.request.GET.get('search_ab_desc','')
 
         ctx['dw_0_total'] = 0
@@ -399,18 +406,19 @@ class AccountBookSumByMonth(ListView):
         request_trade_month = self.request.GET.get('search_trade_month','')
         request_ab_desc = self.request.GET.get('search_ab_desc','')
 
-        info(request_trade_month)
+        search_trade_month = self.request.GET.get('search_trade_month','')
 
-        if request_trade_month is not None and len(request_trade_month) <> 0:
-            first_of_thismonth =  datetime.datetime.strptime(request_trade_month + "-01", '%Y-%m-%d')
-            last_of_thismonth  = first_of_thismonth + relativedelta(months=1) - timedelta(days=1)
-            ab = AccountBook.objects.filter(user=self.request.user,
+        if search_trade_month is None or len(search_trade_month)==0:
+            present_month = datetime.date.today().strftime('%Y-%m')
+            search_trade_month   = present_month
+
+        first_of_thismonth =  datetime.datetime.strptime(search_trade_month + "-01", '%Y-%m-%d')
+        last_of_thismonth  = first_of_thismonth + relativedelta(months=1) - timedelta(days=1)
+
+        ab = AccountBook.objects.filter(user=self.request.user,
                                             trade_date__range=(first_of_thismonth,last_of_thismonth))
 
-            info(ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type'))
-            return ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
-        else:
-            return None
+        return ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
 
 def info(msg):
     logger = logging.getLogger('command')
