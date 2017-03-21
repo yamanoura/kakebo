@@ -27,10 +27,47 @@
     </div>
     <div class="row">
       <div class="col-xs-4 col-sm-2">
-	摘要：
+	入出金種類
+      </div>
+      <div class="col-xs-8 col-sm-10 text-left">
+	<SELECT ID="search_dw_type_select" name="search_dw_type_select" class="form-control">
+	  <OPTION VALUE="" 
+		  {% ifequal search_dw_type_select "" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >---------</OPTION>
+	  <OPTION VALUE="0"
+		  {% ifequal search_dw_type_select "0" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >入金</OPTION>
+	  <OPTION VALUE="1"
+		  {% ifequal search_dw_type_select "1" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >出金</OPTION>
+	</SELECT>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	科目：
       </div>
       <div class="col-xs-8 col-sm-10">
-	<input id="search_ab_desc" name="search_ab_desc" type="text" class="form-control" value="{{ search_ab_desc }}">
+	<SELECT ID="search_at_select" name="search_at_select" class="form-control">
+	  <OPTION VALUE="" 
+		  {% ifequal search_at_select "" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >---------</OPTION>
+	  {% for at_item in search_at %}
+	  <OPTION VALUE={{ at_item.id }} 
+		  {% ifequal search_at_select at_item.id %}
+		  selected="selected"
+		  {% endifequal %}
+		  >{{ at_item.at_name }}</OPTION>
+	  {% endfor %}
+	  </SELECT>
       </div>
     </div>
     <div class="row">      

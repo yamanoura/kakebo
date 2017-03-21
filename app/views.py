@@ -290,6 +290,19 @@ class AccountBookSearch(ListView):
 
         ctx['search_trade_date_from'] = search_trade_date_from
         ctx['search_trade_date_to']   = search_trade_date_to
+        
+        search_dw_type_select = self.request.GET.get('search_dw_type_select','')
+        ctx['search_at_select']  = self.request.GET.get('search_at_select','')
+
+        if search_dw_type_select == '':
+            ctx['search_at'] = None
+            ctx['search_dw_type_select'] = ''
+        else:
+            ctx['search_at'] = AccountTitle.objects.filter(user=self.request.user,
+                                                           at_type=search_dw_type_select)
+            ctx['search_dw_type_select'] = search_dw_type_select
+
+        ctx['search_at_select'] = self.request.GET.get('search_at_select','')
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
@@ -300,12 +313,23 @@ class AccountBookSearch(ListView):
     def get_queryset(self):
         search_trade_date_from = self.request.GET.get('search_trade_date_from','')
         search_trade_date_to   = self.request.GET.get('search_trade_date_to','')
+        search_at_select   = self.request.GET.get('search_at_select','')
 
         search_trade_date_from = get_defaultdate(search_trade_date_from)
         search_trade_date_to   = get_defaultdate(search_trade_date_to)
 
-        return AccountBook.objects.filter(user=self.request.user,
-                                            trade_date__range=(search_trade_date_from,search_trade_date_to)).order_by('trade_date')
+        if search_at_select == '':
+            return AccountBook.objects.filter(user=self.request.user,
+                                            trade_date__range=(search_trade_date_from,
+                                                               search_trade_date_to)
+            ).order_by('trade_date')
+        else:
+            return AccountBook.objects.filter(user=self.request.user,
+                                            trade_date__range=(search_trade_date_from,
+                                                               search_trade_date_to),
+                                              at = search_at_select
+            ).order_by('trade_date')
+
 
 
 class AccountBookSum(ListView):
