@@ -277,8 +277,19 @@ class AccountBookSearch(ListView):
     def get_context_data(self, **kwargs):
         ctx = super(AccountBookSearch,self).get_context_data(**kwargs)
 
-        ctx['search_trade_date']   = self.request.GET.get('search_trade_date','')
-        ctx['search_ab_desc']   = self.request.GET.get('search_ab_desc','')
+        search_trade_date_from = self.request.GET.get('search_trade_date_from','')
+        search_trade_date_to   = self.request.GET.get('search_trade_date_to','')
+
+        search_trade_date_from = get_defaultdate(search_trade_date_from)
+        search_trade_date_to   = get_defaultdate(search_trade_date_to)
+
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name) + '.js'
+
+        ctx['validator_name'] = validator_name
+
+        ctx['search_trade_date_from'] = search_trade_date_from
+        ctx['search_trade_date_to']   = search_trade_date_to
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
@@ -287,12 +298,14 @@ class AccountBookSearch(ListView):
         return ctx
 
     def get_queryset(self):
-        request_trade_date = self.request.GET.get('search_trade_date','')
-        request_ab_desc = self.request.GET.get('search_ab_desc','')
+        search_trade_date_from = self.request.GET.get('search_trade_date_from','')
+        search_trade_date_to   = self.request.GET.get('search_trade_date_to','')
 
-        if request_ab_desc is not None:
-            return AccountBook.objects.filter(user=self.request.user,
-                                              ab_desc__contains=request_ab_desc)
+        search_trade_date_from = get_defaultdate(search_trade_date_from)
+        search_trade_date_to   = get_defaultdate(search_trade_date_to)
+
+        return AccountBook.objects.filter(user=self.request.user,
+                                            trade_date__range=(search_trade_date_from,search_trade_date_to)).order_by('trade_date')
 
 
 class AccountBookSum(ListView):
@@ -430,3 +443,10 @@ def info(msg):
     logger.info(msg)
 
 
+def get_defaultdate(v_date):
+    today = datetime.date.today().strftime('%Y-%m-%d')
+
+    if v_date is None or len(v_date)==0:
+        return today
+    else:
+        return v_date

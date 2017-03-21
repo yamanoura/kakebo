@@ -24,7 +24,9 @@ function vdate(v_date){
 
     if(w_year==in_year &&
        w_month==in_month &&
-       w_day == in_day){
+       w_day == in_day &&
+       str_end == ''
+      ){
 	return true;
     }else{
 	return false;
@@ -54,7 +56,8 @@ function vmonth(v_year_month){
     }
 
     if(w_year==in_year &&
-       w_month==in_month){
+       w_month==in_month &&
+       str_end == ''){
 	return true;
     }else{
 	return false;

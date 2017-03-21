@@ -13,15 +13,16 @@
 {% endblock %}
 
 {% block main %}
-<form method="get" action="" name="filter_form">
+<form method="get" action="" name="search_form" id="search_form">
   {% csrf_token %}
   <div class="container">
     <div class="row">
       <div class="col-xs-4 col-sm-2">
 	取引日：
       </div>
-      <div class="col-xs-8 col-sm-10">
-	<input id="search_trade_date" name="search_trade_date" type="date" class="form-control" value="{{ search_trade_date }}">
+      <div class="col-xs-8 col-sm-10 form-inline">
+	From<input id="search_trade_date_from" name="search_trade_date_from" type="date" class="form-control" value="{{ search_trade_date_from }}">
+	To<input id="search_trade_date_to" name="search_trade_date_to" type="date" class="form-control" value="{{ search_trade_date_to }}">
       </div>
     </div>
     <div class="row">
@@ -34,7 +35,7 @@
     </div>
     <div class="row">      
       <div class="col-xs-12 col-sm-12 text-left">
-	<button type="submit" class="btn btn-primary input-lg form-control">
+	<button type="button" class="btn btn-primary input-lg form-control" onclick="search()">
 	  検索
 	</button>
       </div>
