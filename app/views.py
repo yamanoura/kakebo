@@ -283,16 +283,15 @@ class AccountBookSearch(ListView):
         search_trade_date_from = get_defaultdate(search_trade_date_from)
         search_trade_date_to   = get_defaultdate(search_trade_date_to)
 
+        ctx['search_trade_date_from'] = search_trade_date_from
+        ctx['search_trade_date_to']   = search_trade_date_to
+
         template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
         validator_name = re.sub(r'.html$','',template_file_name) + '.js'
 
         ctx['validator_name'] = validator_name
-
-        ctx['search_trade_date_from'] = search_trade_date_from
-        ctx['search_trade_date_to']   = search_trade_date_to
         
         search_dw_type_select = self.request.GET.get('search_dw_type_select','')
-        ctx['search_at_select']  = self.request.GET.get('search_at_select','')
 
         if search_dw_type_select == '':
             ctx['search_at'] = None
@@ -302,7 +301,14 @@ class AccountBookSearch(ListView):
                                                            at_type=search_dw_type_select)
             ctx['search_dw_type_select'] = search_dw_type_select
 
-        ctx['search_at_select'] = self.request.GET.get('search_at_select','')
+
+        search_at_select = self.request.GET.get('search_at_select','')
+
+        # templateの組み込みタグでの比較を行うために数値変換を行う
+        if(search_at_select!=""):
+            search_at_select = int(search_at_select)
+
+        ctx['search_at_select'] = search_at_select
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
@@ -313,6 +319,7 @@ class AccountBookSearch(ListView):
     def get_queryset(self):
         search_trade_date_from = self.request.GET.get('search_trade_date_from','')
         search_trade_date_to   = self.request.GET.get('search_trade_date_to','')
+        search_dw_type_select   = self.request.GET.get('search_dw_type_select','')
         search_at_select   = self.request.GET.get('search_at_select','')
 
         search_trade_date_from = get_defaultdate(search_trade_date_from)
@@ -320,11 +327,13 @@ class AccountBookSearch(ListView):
 
         if search_at_select == '':
             return AccountBook.objects.filter(user=self.request.user,
+                                              dw_type__contains=search_dw_type_select,
                                             trade_date__range=(search_trade_date_from,
                                                                search_trade_date_to)
             ).order_by('trade_date')
         else:
             return AccountBook.objects.filter(user=self.request.user,
+                                              dw_type__contains=search_dw_type_select,
                                             trade_date__range=(search_trade_date_from,
                                                                search_trade_date_to),
                                               at = search_at_select
@@ -349,16 +358,12 @@ class AccountBookSum(ListView):
 
         ctx['validator_name'] = validator_name
 
-
         search_trade_date = self.request.GET.get('search_trade_date','')
 
-        if search_trade_date is None or len(search_trade_date)==0:
-            today = datetime.date.today().strftime('%Y-%m-%d')
-            ctx['search_trade_date'] = today
-        else:
-            ctx['search_trade_date']   = search_trade_date
+        search_trade_date = get_defaultdate(search_trade_date)
 
-        ctx['search_ab_desc']   = self.request.GET.get('search_ab_desc','')
+        ctx['search_trade_date'] = search_trade_date
+
         ctx['dw_0_total'] = 0
         ctx['dw_1_total'] = 0
 
@@ -384,10 +389,8 @@ class AccountBookSum(ListView):
     def get_queryset(self):
         search_trade_date = self.request.GET.get('search_trade_date','')
 
-        if search_trade_date is None or len(search_trade_date)==0:
-            search_trade_date = '2017-03-12' #datetime.date.today()
+        search_trade_date = get_defaultdate(search_trade_date)
 
-        today = datetime.date.today()
         ab = AccountBook.objects.filter(user=self.request.user,trade_date=search_trade_date)
         return ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
 
@@ -474,3 +477,4 @@ def get_defaultdate(v_date):
         return today
     else:
         return v_date
+
