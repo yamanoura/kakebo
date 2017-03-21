@@ -70,6 +70,27 @@
 	  </SELECT>
       </div>
     </div>
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	Project：
+      </div>
+      <div class="col-xs-8 col-sm-10">
+	<SELECT ID="search_project_select" name="search_project_select" class="form-control">
+	  <OPTION VALUE="" 
+		  {% ifequal search_project_select "" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >---------</OPTION>
+	  {% for project_item in search_project %}
+	  <OPTION VALUE={{ project_item.id }}
+		  {% ifequal search_project_select project_item.id %}
+		  selected="selected"
+		  {% endifequal %}
+		  >{{ project_item.project_name }}</OPTION>
+	  {% endfor %}
+	  </SELECT>
+      </div>
+    </div>
     <div class="row">      
       <div class="col-xs-12 col-sm-12 text-left">
 	<button type="button" class="btn btn-primary input-lg form-control" onclick="search()">

@@ -293,6 +293,9 @@ class AccountBookSearch(ListView):
         
         search_dw_type_select = self.request.GET.get('search_dw_type_select','')
 
+        ctx['search_project'] = Project.objects.filter(user=self.request.user,
+                                                       project_status=0)
+        
         if search_dw_type_select == '':
             ctx['search_at'] = None
             ctx['search_dw_type_select'] = ''
@@ -301,7 +304,6 @@ class AccountBookSearch(ListView):
                                                            at_type=search_dw_type_select)
             ctx['search_dw_type_select'] = search_dw_type_select
 
-
         search_at_select = self.request.GET.get('search_at_select','')
 
         # templateの組み込みタグでの比較を行うために数値変換を行う
@@ -309,6 +311,14 @@ class AccountBookSearch(ListView):
             search_at_select = int(search_at_select)
 
         ctx['search_at_select'] = search_at_select
+
+        search_project_select   = self.request.GET.get('search_project_select','')
+
+        # templateの組み込みタグでの比較を行うために数値変換を行う
+        if(search_project_select!=""):
+            search_project_select = int(search_project_select)
+
+        ctx['search_project_select'] = search_project_select
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
@@ -321,24 +331,30 @@ class AccountBookSearch(ListView):
         search_trade_date_to   = self.request.GET.get('search_trade_date_to','')
         search_dw_type_select   = self.request.GET.get('search_dw_type_select','')
         search_at_select   = self.request.GET.get('search_at_select','')
+        search_project_select   = self.request.GET.get('search_project_select','')
 
         search_trade_date_from = get_defaultdate(search_trade_date_from)
         search_trade_date_to   = get_defaultdate(search_trade_date_to)
 
+        ab = ''
         if search_at_select == '':
-            return AccountBook.objects.filter(user=self.request.user,
+            ab = AccountBook.objects.filter(user=self.request.user,
                                               dw_type__contains=search_dw_type_select,
                                             trade_date__range=(search_trade_date_from,
                                                                search_trade_date_to)
             ).order_by('trade_date')
         else:
-            return AccountBook.objects.filter(user=self.request.user,
+            ab =  AccountBook.objects.filter(user=self.request.user,
                                               dw_type__contains=search_dw_type_select,
                                             trade_date__range=(search_trade_date_from,
                                                                search_trade_date_to),
                                               at = search_at_select
-            ).order_by('trade_date')
+            )
 
+        if search_project_select=="":
+            return ab
+        else:
+            return ab.filter(project=search_project_select)
 
 
 class AccountBookSum(ListView):
