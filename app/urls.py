@@ -9,7 +9,9 @@ APP_NAME = 'app'
 
 urlpatterns = [
     #BaseCreateView
-    url(r'^project/add$', views.BaseCreateView.as_view(model=Project,form_class=ProjectForm),
+    url(r'^project/add$', views.BaseCreateView.as_view(template_name='%s/ab_d_form.html' % APP_NAME,
+                                                       model=Project,
+                                                       form_class=ProjectForm),
         name='project_add'),
 
     #入金用
