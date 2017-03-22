@@ -1,14 +1,14 @@
 {% extends 'common/base.html' %}
 {% load bootstrap %}
 
-{% block title %}勘定科目情報{% if is_addmode %}登録{% else %}修正{% endif %}{% endblock %}
+{% block title %}入金情報{% if is_addmode %}登録{% else %}修正{% endif %}{% endblock %}
 
 {% block page_name %}
-勘定科目情報{% if is_addmode %}登録{% else %}修正{% endif %}
+入金情報{% if is_addmode %}登録{% else %}修正{% endif %}
 {% endblock %}
 
 {% block page_desc %}
-勘定科目情報の{% if is_addmode %}新規登録{% else %}修正{% endif %}を行う
+入金情報の{% if is_addmode %}新規登録{% else %}修正{% endif %}を行う
 {% endblock %}
 
 {% block main %}
@@ -24,7 +24,7 @@
   <div class="container">
     <div class="row">
       <div class="form-group">
-	<button type="submit" class="btn btn-primary input-lg form-control">
+	<button type="submit" class="btn btn-primary input-lg form-control" onclick="addupd()">
 	  {% if is_addmode %}新規登録{% else %}更新{% endif %}
 	</button>
       </div>

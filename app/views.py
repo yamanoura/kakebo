@@ -324,6 +324,8 @@ class AccountBookSearch(ListView):
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
 
+        info(datetime.date.today().strftime('%Y-%m')+'-01')
+
         return ctx
 
     def get_queryset(self):
@@ -350,6 +352,92 @@ class AccountBookSearch(ListView):
                                                                search_trade_date_to),
                                               at = search_at_select
             )
+
+        if search_project_select=="":
+            return ab
+        else:
+            return ab.filter(project=search_project_select)
+
+##帳簿予定検索
+class AccountBookPlanSearch(ListView):
+    model = AccountBookPlan
+    paginate_by = 5
+
+    def dispatch(self,request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/common/login/?next=%s' % request.path)
+        else:
+            return super(AccountBookPlanSearch, self).dispatch(request,*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super(AccountBookPlanSearch,self).get_context_data(**kwargs)
+
+        search_plan_year_month = self.request.GET.get('search_plan_year_month','')
+
+        search_plan_year_month = get_defaultyearmonth(search_plan_year_month)
+
+        ctx['search_plan_year_month'] = search_plan_year_month
+
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name) + '.js'
+
+        ctx['validator_name'] = validator_name
+        
+        search_dw_type_select = self.request.GET.get('search_dw_type_select','')
+
+        ctx['search_project'] = Project.objects.filter(user=self.request.user,
+                                                       project_status=0)
+        
+        if search_dw_type_select == '':
+            ctx['search_at'] = None
+            ctx['search_dw_type_select'] = ''
+        else:
+            ctx['search_at'] = AccountTitle.objects.filter(user=self.request.user,
+                                                           at_type=search_dw_type_select)
+            ctx['search_dw_type_select'] = search_dw_type_select
+
+        search_at_select = self.request.GET.get('search_at_select','')
+
+        # templateの組み込みタグでの比較を行うために数値変換を行う
+        if(search_at_select!=""):
+            search_at_select = int(search_at_select)
+
+        ctx['search_at_select'] = search_at_select
+
+        search_project_select   = self.request.GET.get('search_project_select','')
+
+        # templateの組み込みタグでの比較を行うために数値変換を行う
+        if(search_project_select!=""):
+            search_project_select = int(search_project_select)
+
+        ctx['search_project_select'] = search_project_select
+
+        ctx['is_logined'] = True
+        ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
+
+        return ctx
+
+    def get_queryset(self):
+        search_plan_year_month   = self.request.GET.get('search_plan_year_month','')
+        search_dw_type_select   = self.request.GET.get('search_dw_type_select','')
+        search_at_select   = self.request.GET.get('search_at_select','')
+        search_project_select   = self.request.GET.get('search_project_select','')
+
+        search_plan_year_month = get_defaultyearmonth(search_plan_year_month)
+
+        ab = ''
+        if search_at_select == '':
+            ab = AccountBookPlan.objects.filter(user=self.request.user,
+                                                dw_type__contains=search_dw_type_select,
+                                                plan_year_month=search_plan_year_month
+            ).order_by('plan_year_month')
+        else:
+            ab =  AccountBookPlan.objects.filter(user=self.request.user,
+                                                 dw_type__contains=search_dw_type_select,
+                                                 plan_year_month=search_plan_year_month,
+                                                 at = search_at_select
+            ).order_by('plan_year_month')
 
         if search_project_select=="":
             return ab
@@ -493,4 +581,13 @@ def get_defaultdate(v_date):
         return today
     else:
         return v_date
+
+
+def get_defaultyearmonth(v_year_month):
+    this_year_month = datetime.date.today().strftime('%Y-%m')
+
+    if v_year_month is None or len(v_year_month)==0:
+        return this_year_month
+    else:
+        return v_year_month
 

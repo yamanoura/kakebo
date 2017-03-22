@@ -13,18 +13,29 @@ urlpatterns = [
                                                        model=Project,
                                                        form_class=ProjectForm),
         name='project_add'),
-
+    ##帳簿情報
     #入金用
     url(r'^ab_d/add$', views.BaseCreateView.as_view(template_name='%s/ab_d_form.html' % APP_NAME,
                                                   model=AccountBook,
                                                   form_class=AccountBookDepositForm),
         name='ab_d_add'),
-
     #出金用
     url(r'^ab_w/add$', views.BaseCreateView.as_view(template_name='%s/ab_w_form.html' % APP_NAME,
                                                   model=AccountBook,
                                                   form_class=AccountBookWithdrawalForm),
         name='ab_w_add'),
+    ##予定情報
+    #入金用
+    url(r'^ab_plan_d/add$',views.BaseCreateView.as_view(template_name='%s/ab_plan_d_form.html'%APP_NAME,
+                                                  model=AccountBookPlan,
+                                                  form_class=AccountBookPlanDepositForm),
+        name='ab_plan_d_add'),
+    #出金用
+    url(r'^ab_plan_w/add$',views.BaseCreateView.as_view(template_name='%s/ab_plan_w_form.html'%APP_NAME,
+                                                  model=AccountBookPlan,
+                                                  form_class=AccountBookPlanWithdrawalForm),
+        name='ab_plan_w_add'),
+
     url(r'^at/add$', views.BaseCreateView.as_view(template_name='%s/at_form.html' % APP_NAME,
                                                   model=AccountTitle,
                                                   form_class=AccountTitleForm),
@@ -43,6 +54,7 @@ urlpatterns = [
         views.BaseUpdateView.as_view(model=Project,form_class=ProjectForm),
         name='project_edit'),
 
+    ##帳簿情報
     #入金用
     url(r'^ab_d/edit/(?P<pk>\d+)$',
         views.BaseUpdateView.as_view(template_name='%s/ab_d_form.html' % APP_NAME,
@@ -57,6 +69,20 @@ urlpatterns = [
                                      form_class=AccountBookWithdrawalForm),
         name='ab_w_edit'),
 
+    ##帳簿予定
+    #入金用
+    url(r'^ab_plan_d/edit/(?P<pk>\d+)$',
+        views.BaseUpdateView.as_view(template_name='%s/ab_plan_d_form.html' % APP_NAME,
+                                     model=AccountBookPlan,
+                                     form_class=AccountBookPlanDepositForm),
+        name='ab_plan_d_edit'),
+
+    #出金用
+    url(r'^ab_plan_w/edit/(?P<pk>\d+)$',
+        views.BaseUpdateView.as_view(template_name='%s/ab_plan_w_form.html' % APP_NAME,
+                                     model=AccountBookPlan,
+                                     form_class=AccountBookPlanWithdrawalForm),
+        name='ab_plan_w_edit'),
 
     url(r'^at/edit/(?P<pk>\d+)$',
         views.BaseUpdateView.as_view(template_name='%s/at_form.html' % APP_NAME,
@@ -81,10 +107,17 @@ urlpatterns = [
         views.BaseDeleteView.as_view(model=Project),
         name='project_delete'),
 
+    #帳簿情報
     url(r'^ab/delete/(?P<pk>\d+)$', 
         views.BaseDeleteView.as_view(model=AccountBook,
                                      template_name='%s/ab_confirm_delete.html' % APP_NAME),
         name='ab_delete'),
+
+    ##予定情報
+    url(r'^ab_plan/delete/(?P<pk>\d+)$', 
+        views.BaseDeleteView.as_view(model=AccountBookPlan,
+                                     template_name='%s/ab_plan_confirm_delete.html' % APP_NAME),
+        name='ab_plan_delete'),
 
     url(r'^at/delete/(?P<pk>\d+)$', 
         views.BaseDeleteView.as_view(model=AccountTitle,
@@ -102,7 +135,11 @@ urlpatterns = [
 
     #BaseListView
     url(r'^project/search$', views.ProjectSearch.as_view(template_name='%s/project_list.html' % APP_NAME),name='project_search'),
+    #帳簿情報
     url(r'^ab/search$', views.AccountBookSearch.as_view(template_name='%s/ab_list.html' % APP_NAME),name='ab_list'),
+    #帳簿予定
+    url(r'^ab_plan/search$', views.AccountBookPlanSearch.as_view(template_name='%s/ab_plan_list.html'%APP_NAME),name='ab_plan_list'),
+
 
     url(r'^at/search$', views.AccountTitleSearch.as_view(template_name='%s/at_list.html' % APP_NAME),name='at_search'),
 

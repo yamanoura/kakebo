@@ -8,6 +8,8 @@ from kakebo import settings
 from django.utils import timezone
 from .constant import *
 
+import datetime
+
 # Create your models here.
 #Project情報
 class Project(models.Model):
@@ -76,6 +78,51 @@ class AccountBook(models.Model):
                                     blank=True,
                                     null=True,
                                     default=timezone.now())    
+
+    dw_type = models.CharField(u'入出金種類',
+                               max_length=1,
+                               default=1,
+                               choices=DEPOSIT_WITHDRAWAL_TYPE_DEFINE)
+
+    at   = models.ForeignKey(AccountTitle,
+                             verbose_name=u'勘定科目'
+    )
+
+    dwm   = models.ForeignKey(DepositWithdrawalMethod,
+                            models.SET_NULL,
+                            blank=True,
+                            null=True,
+                            verbose_name=u'入出金方法'
+    )
+
+    project = models.ForeignKey(Project,
+                            models.SET_NULL,
+                            blank=True,
+                            null=True,
+                            verbose_name=u'Project情報'
+    )
+
+    ab_desc = models.CharField(u'帳簿摘要',
+                               max_length=100
+    )
+
+    ab_money = models.IntegerField(u'帳簿金額',
+                                        validators=[MinValueValidator(1), MaxValueValidator(99999999)]
+    )
+    
+    def __str__(self):
+        return self.ab_desc
+
+    def __unicode__(self):
+        return u"{}".format(self.ab_desc)
+    
+
+#予定帳簿
+class AccountBookPlan(models.Model):
+    user = models.ForeignKey(User)
+    plan_year_month = models.CharField(u'予定年月',
+                                  max_length=7,
+                                  default=datetime.date.today().strftime('%Y-%m'))
 
     dw_type = models.CharField(u'入出金種類',
                                max_length=1,
