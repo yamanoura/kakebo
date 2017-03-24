@@ -89,9 +89,6 @@ class AccountBook(models.Model):
     )
 
     dwm   = models.ForeignKey(DepositWithdrawalMethod,
-                            models.SET_NULL,
-                            blank=True,
-                            null=True,
                             verbose_name=u'入出金方法'
     )
 

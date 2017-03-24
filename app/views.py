@@ -569,6 +569,78 @@ class AccountBookSumByMonth(ListView):
 
         return ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
 
+class PlanReusltSumByMonth(ListView):
+    model = AccountBook
+
+    def dispatch(self,request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/common/login/?next=%s' % request.path)
+        else:
+            return super(AccountBookSumByMonth, self).dispatch(request,*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super(AccountBookSumByMonth,self).get_context_data(**kwargs)
+
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name) + '.js'
+
+        ctx['validator_name'] = validator_name
+
+        search_trade_month = self.request.GET.get('search_trade_month','')
+
+        if search_trade_month is None or len(search_trade_month)==0:
+            present_month = datetime.date.today().strftime('%Y-%m')
+            ctx['search_trade_month']   = present_month
+        else:
+            ctx['search_trade_month']   = search_trade_month
+
+        ctx['search_ab_desc']   = self.request.GET.get('search_ab_desc','')
+
+        ctx['dw_0_total'] = 0
+        ctx['dw_1_total'] = 0
+
+        if ctx['search_trade_month'] is not None and len(ctx['search_trade_month']) <> 0:
+            first_of_thismonth =  datetime.datetime.strptime(ctx['search_trade_month'] + "-01", '%Y-%m-%d')
+            last_of_thismonth  = first_of_thismonth + relativedelta(months=1) - timedelta(days=1)
+            ab = AccountBook.objects.filter(user=self.request.user,
+                                            trade_date__range=(first_of_thismonth,last_of_thismonth))
+
+            ab_list = ab.values('dw_type').annotate(total_money=Sum('ab_money'))
+
+            for ab_dict in ab_list:
+                #入金
+                if ab_dict['dw_type']=='0':
+                    ctx['dw_0_total']   = ab_dict['total_money']
+                else:
+                    ctx['dw_1_total']   = ab_dict['total_money']
+
+
+        ctx['is_logined'] = True
+        ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
+
+        return ctx
+
+    def get_queryset(self):
+        request_trade_month = self.request.GET.get('search_trade_month','')
+        request_ab_desc = self.request.GET.get('search_ab_desc','')
+
+        search_trade_month = self.request.GET.get('search_trade_month','')
+
+        if search_trade_month is None or len(search_trade_month)==0:
+            present_month = datetime.date.today().strftime('%Y-%m')
+            search_trade_month   = present_month
+
+        first_of_thismonth =  datetime.datetime.strptime(search_trade_month + "-01", '%Y-%m-%d')
+        last_of_thismonth  = first_of_thismonth + relativedelta(months=1) - timedelta(days=1)
+
+        ab = AccountBook.objects.filter(user=self.request.user,
+                                            trade_date__range=(first_of_thismonth,last_of_thismonth))
+
+        return ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+
+
+
 def info(msg):
     logger = logging.getLogger('command')
     logger.info(msg)
