@@ -23,3 +23,8 @@ DEPOSIT_WITHDRAWAL_METHOD_TYPE_DEFINE = (
     ('3',u'口座振替'),
     ('4',u'ポイント'),
 )
+
+ACCOUNT_BOOK_CREATE_FLAG = (
+    ('0',u'未作成'),
+    ('1',u'作成済'),
+)

@@ -107,7 +107,6 @@ class AccountBookWithdrawalForm(ModelForm):
         self.fields["dwm"].queryset = DepositWithdrawalMethod.objects.filter(user=self.user)
         self.fields["project"].queryset = Project.objects.filter(user=self.user,project_status='0')
 
-
 #入金用
 class AccountBookPlanDepositForm(ModelForm):
     user = None
@@ -121,6 +120,7 @@ class AccountBookPlanDepositForm(ModelForm):
             "project",
             "ab_desc",
             "ab_money",
+            "ab_create_flag",
         )
 
         widgets = {
@@ -136,6 +136,7 @@ class AccountBookPlanDepositForm(ModelForm):
         self.fields["at"].queryset = AccountTitle.objects.filter(user=self.user,at_type=0)
         self.fields["dwm"].queryset = DepositWithdrawalMethod.objects.filter(user=self.user)
         self.fields["project"].queryset = Project.objects.filter(user=self.user,project_status='0')
+        self.fields["ab_create_flag"].widget = forms.HiddenInput()
 
 
 #出金用
@@ -150,6 +151,7 @@ class AccountBookPlanWithdrawalForm(ModelForm):
                   "project",
                   "ab_desc",
                   "ab_money",
+                  "ab_create_flag",
         )
 
         widgets = {
@@ -165,5 +167,6 @@ class AccountBookPlanWithdrawalForm(ModelForm):
         self.fields["at"].queryset = AccountTitle.objects.filter(user=self.user,at_type='1')
         self.fields["dwm"].queryset = DepositWithdrawalMethod.objects.filter(user=self.user)
         self.fields["project"].queryset = Project.objects.filter(user=self.user,project_status='0')
+        self.fields["ab_create_flag"].widget = forms.HiddenInput()
 
 

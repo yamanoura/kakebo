@@ -9,6 +9,10 @@
 
 {% block page_desc %}
 出金予定の{% if is_addmode %}新規登録{% else %}修正{% endif %}を行う
+{% ifequal form.ab_create_flag.value '1' %}
+<br>
+(<font color="red">この予定は帳簿作成済のため、修正不可</font>)
+{% endifequal %}
 {% endblock %}
 
 {% block main %}
@@ -22,6 +26,7 @@
     </div>
   </div>
   <div class="container">
+    {% ifnotequal form.ab_create_flag.value '1' %}
     <div class="row">
       <div class="form-group">
 	<button type="submit" class="btn btn-primary input-lg form-control">
@@ -29,6 +34,17 @@
 	</button>
       </div>
     </div>
+    <br>
+    {% endifnotequal %}
+    {% ifequal form.ab_create_flag.value '0' %}
+    <div class="row">
+      <div class="form-group">
+	<button type="submit" class="btn btn-success input-lg form-control" onclick="create()">
+	  出金情報作成
+	</button>
+      </div>
+    </div>
+    {% endifequal %}
   </div>
 </form>
 {% endblock %}

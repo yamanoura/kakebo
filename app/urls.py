@@ -51,7 +51,9 @@ urlpatterns = [
 
     #BaseUpdateView
     url(r'^project/edit/(?P<pk>\d+)$', 
-        views.BaseUpdateView.as_view(model=Project,form_class=ProjectForm),
+        views.BaseUpdateView.as_view(template_name='%s/project_form.html' % APP_NAME,
+                                     model=Project,
+                                     form_class=ProjectForm),
         name='project_edit'),
 
     ##帳簿情報

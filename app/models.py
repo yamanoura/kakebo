@@ -131,9 +131,6 @@ class AccountBookPlan(models.Model):
     )
 
     dwm   = models.ForeignKey(DepositWithdrawalMethod,
-                            models.SET_NULL,
-                            blank=True,
-                            null=True,
                             verbose_name=u'入出金方法'
     )
 
@@ -150,6 +147,13 @@ class AccountBookPlan(models.Model):
 
     ab_money = models.IntegerField(u'帳簿金額',
                                         validators=[MinValueValidator(1), MaxValueValidator(99999999)]
+    )
+
+
+    ab_create_flag = models.CharField(u'帳簿作成フラグ',
+                                      max_length=1,
+                                      default=0,
+                                      choices=ACCOUNT_BOOK_CREATE_FLAG
     )
     
     def __str__(self):

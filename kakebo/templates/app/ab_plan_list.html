@@ -145,10 +145,17 @@
     </td>
     <td><div align="right">{{ item.ab_money|intcomma  }}</div></td>
     <td>
+      {% ifequal item.ab_create_flag "0" %}
       <button type="submit" class="btn btn-info input form-control" 
 	      onClick="location.href='/app/ab_plan/delete/{{ item.id  }}'">
 	削除
       </button>
+      {% else %}
+      <button type="submit" class="btn btn btn-success input form-control" 
+	      onClick="location.href='/app/ab_plan/delete/{{ item.id  }}'" disabled>
+	削除不可
+      </button>
+      {% endifequal %}
     </td>
   </tr>
   {% endfor %}

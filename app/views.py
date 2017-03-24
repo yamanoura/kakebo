@@ -40,36 +40,46 @@ class BaseCreateView(BaseView,CreateView):
     success_url= SUCCESS_URL
 
     def dispatch(self,request, *args, **kwargs):
+        info('dispatch')
+
         class_object = self.get_object()
+
         if not request.user.is_authenticated():
             return HttpResponseRedirect(AUTH_FAILURE % request.path)
         else:
             return super(class_object, self).dispatch(request,*args, **kwargs)
 
-    def form_valid(self, form):
-        class_object = self.get_object()
-        form.instance.user = self.request.user
-        return super(class_object, self).form_valid(form) 
-        return render(self.request,self.template_name,
-                      self.get_context_data(form=form))
-
     def get_context_data(self, **kwargs):
+        info('get_context_date')
         ctx = super(BaseCreateView,self).get_context_data(**kwargs)
 
         template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
         validator_name = re.sub(r'.html$','',template_file_name) + '.js'
 
         ctx['validator_name'] = validator_name
+
         ctx['is_logined'] = True
         ctx['is_addmode'] = True
         ctx['userid']   = self.request.user
         return ctx
 
     def get_form_kwargs(self):
+        info('get_form_kwargs')
         class_object = self.get_object()
         kwargs = super(BaseCreateView, self).get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
+
+    def form_valid(self, form):
+        info('form_valid')
+        class_object = self.get_object()
+        form.instance.user = self.request.user
+
+        return super(class_object, self).form_valid(form) 
+        return render(self.request,self.template_name,
+                      self.get_context_data(form=form))
+
+
         
 class BaseUpdateView(UpdateView):
     success_url = SUCCESS_URL
@@ -92,22 +102,67 @@ class BaseUpdateView(UpdateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
+
+        class_object = self.get_object()
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name)
+
+        if (validator_name == 'ab_plan_w_form' or validator_name == 'ab_plan_d_form') and class_object.ab_create_flag=='1':
+            set_at = AccountTitle(user=self.request.user,
+                              id=class_object.at.id
+            )
+
+            set_dwm = DepositWithdrawalMethod(user=self.request.user,
+                                              id=class_object.dwm.id
+            )
+
+            set_project=None
+            if class_object.project==None:
+                set_project = None
+            else:
+                set_project = Project(user=self.request.user,
+                                  id=class_object.project.id
+                )
+
+            ab = AccountBook(user=self.request.user,
+                        trade_date=get_defaultdate(None),
+                        dw_type=class_object.dw_type,
+                        at=set_at,
+                        dwm=set_dwm,
+                        project=set_project,
+                        ab_desc=class_object.ab_desc,
+                        ab_money=class_object.ab_money
+            )
+
+            ab.save()
+
+
         return super(BaseUpdateView, self).form_valid(form) 
         return render(self.request,self.template_name,
                       self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         ctx = super(BaseUpdateView,self).get_context_data(**kwargs)
+
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name) + '.js'
+
+        ctx['validator_name'] = validator_name
+
         ctx['is_logined'] = True
         ctx['is_addmode'] = False
         ctx['userid']   = self.request.user
         return ctx
 
+
+
     def get_form_kwargs(self):
         class_object = self.get_object()
         kwargs = super(BaseUpdateView, self).get_form_kwargs()
         kwargs['user'] = self.request.user
+
         return kwargs
+
 
 class BaseDeleteView(DeleteView):
     success_url = SUCCESS_URL
