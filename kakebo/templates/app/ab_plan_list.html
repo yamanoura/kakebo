@@ -26,7 +26,7 @@
     </div>
     <div class="row">
       <div class="col-xs-4 col-sm-2">
-	入出金種類
+	入出金種類：
       </div>
       <div class="col-xs-8 col-sm-10 text-left">
 	<SELECT ID="search_dw_type_select" name="search_dw_type_select" class="form-control">
@@ -88,6 +88,14 @@
 		  >{{ project_item.project_name }}</OPTION>
 	  {% endfor %}
 	  </SELECT>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	帳簿未作成：
+      </div>
+      <div class="col-xs-8 col-sm-10">
+	<input type="checkbox" id="search_ab_create_flag_check" name="search_ab_create_flag_check" class="form-control input-lg" {% ifequal search_ab_create_flag_check "on" %}checked="checked"{% endifequal %}>
       </div>
     </div>
     <div class="row">      

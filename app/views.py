@@ -467,6 +467,8 @@ class AccountBookPlanSearch(ListView):
 
         ctx['search_project_select'] = search_project_select
 
+        ctx['search_ab_create_flag_check'] = self.request.GET.get('search_ab_create_flag_check','')
+
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
@@ -478,6 +480,7 @@ class AccountBookPlanSearch(ListView):
         search_dw_type_select   = self.request.GET.get('search_dw_type_select','')
         search_at_select   = self.request.GET.get('search_at_select','')
         search_project_select   = self.request.GET.get('search_project_select','')
+        search_ab_create_flag_check = self.request.GET.get('search_ab_create_flag_check','')
 
         search_plan_year_month = get_defaultyearmonth(search_plan_year_month)
 
@@ -495,10 +498,14 @@ class AccountBookPlanSearch(ListView):
             ).order_by('plan_year_month')
 
         if search_project_select=="":
-            return ab
+            ab = ab
         else:
-            return ab.filter(project=search_project_select)
+            ab = ab.filter(project=search_project_select)
 
+        if search_ab_create_flag_check=="on":
+            ab = ab.filter(ab_create_flag="0")
+
+        return ab
 
 class AccountBookSum(ListView):
     model = AccountBook
