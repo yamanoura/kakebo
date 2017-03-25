@@ -21,6 +21,7 @@ from dateutil.relativedelta import relativedelta
 import logging
 from django.db.models import Sum
 from django.db.models import Max
+from django.db.models import Count
 import re
 
 APP_NAME     = 'app'
@@ -673,7 +674,159 @@ class AccountBookSumByMonth(ListView):
 
         return list_ab
 
+#帳簿集計(Project別)
+class AccountBookSumByProject(ListView):
+    model = AccountBook
 
+    def dispatch(self,request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/common/login/?next=%s' % request.path)
+        else:
+            return super(AccountBookSumByProject, self).dispatch(request,*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super(AccountBookSumByProject,self).get_context_data(**kwargs)
+
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name) + '.js'
+
+        ctx['validator_name'] = validator_name
+
+        search_project_select = self.request.GET.get('search_project_select','')
+        search_ab_create_flag_check = self.request.GET.get('search_ab_create_flag_check','')
+        
+        search_project = Project.objects.filter(user=self.request.user)
+
+        ctx['search_project'] = search_project
+
+        # templateの組み込みタグでの比較を行うために数値変換を行う
+        if(search_project_select!=""):
+            search_project_select = int(search_project_select)
+
+        ctx['search_project_select'] = search_project_select
+
+        ctx['dw_0_total'] = 0
+        ctx['dw_1_total'] = 0
+        ctx['month_list'] = None
+
+        project_select = None
+        if search_project_select<>'':
+            project_select = Project(user=self.request.user,
+                                     id=search_project_select)
+
+        #AccountBook
+        if project_select<>None:
+            ab = AccountBook.objects.filter(user=self.request.user,
+                                            project=project_select)
+
+            ab_list = ab.values('dw_type').annotate(total_money=Sum('ab_money'))
+
+            #Set AccountBook Money
+            for ab_dict in ab_list:
+                #入金
+                if ab_dict['dw_type']=='0':
+                    ctx['dw_0_total']   = ab_dict['total_money']
+                #出金
+                else:
+                    ctx['dw_1_total']   = ab_dict['total_money']
+
+            if search_ab_create_flag_check=="on":
+                #AccountBookPlan
+                abp = AccountBookPlan.objects.filter(user=self.request.user,
+                                                     project=project_select,
+                                                     ab_create_flag="0")
+
+                abp_list = abp.values('dw_type').annotate(total_money=Sum('ab_money'))
+
+                abp_dw_0_total = 0
+                abp_dw_1_total = 0
+
+                for abp_dict in abp_list:
+                    if abp_dict['dw_type'] == '0':
+                        abp_dw_0_total = abp_dict['total_money']
+                    else:
+                        abp_dw_1_total = abp_dict['total_money']
+
+                ctx['dw_0_total'] += abp_dw_0_total
+                ctx['dw_1_total'] += abp_dw_1_total
+
+            #AccountBook 登録されている月がわかる
+            ab_month_list = AccountBook.objects.filter(user=self.request.user,
+                                                       project=project_select)
+
+            ab_month_list = ab_month_list.extra({'month': 'strftime("%%Y-%%m", trade_date)'})
+
+            ab_month_list = ab_month_list.values('month').annotate(cnt=Count('*'))
+
+            ab_month_list_list = list(ab_month_list)
+
+            abp_month_list = None
+            abp_month_list_list = None
+            if search_ab_create_flag_check=="on":
+                #AccountBookPlan 登録されている月がわかる
+                abp_month_list = AccountBookPlan.objects.filter(user=self.request.user,
+                                                                project=project_select)
+
+                abp_month_list = abp_month_list.extra({'month': 'plan_year_month'})
+
+                abp_month_list = abp_month_list.values('month').annotate(cnt=Count('*'))
+
+                abp_month_list_list = list(abp_month_list)
+
+                ab_month_list_list.extend(abp_month_list_list)
+
+            month_list = []
+            for item in ab_month_list_list:
+                if item['month'] not in month_list:
+                    month_list.append(item['month'])
+
+            ctx['month_list'] = month_list
+        
+        ctx['search_ab_create_flag_check'] = self.request.GET.get('search_ab_create_flag_check','')
+
+        ctx['is_logined'] = True
+        ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
+
+        return ctx
+
+    def get_queryset(self):
+        search_project_select = self.request.GET.get('search_project_select','')
+        search_ab_create_flag_check = self.request.GET.get('search_ab_create_flag_check','')
+
+        project_select=None
+        if(search_project_select!=""):
+            search_project_select = int(search_project_select)
+            project_select = Project.objects.filter(user=self.request.user,
+                                    id=search_project_select)
+
+        list_ab = None
+        if project_select<>None:
+            ab = AccountBook.objects.filter(user=self.request.user,
+                                            project=project_select)
+            
+            ab = ab.extra({'month': 'strftime("%%Y-%%m", trade_date)'})
+
+            ab = ab.values('dw_type','at','month').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+
+            list_ab = list(ab)
+            
+            if search_ab_create_flag_check=="on":
+                abp = AccountBookPlan.objects.filter(user=self.request.user,
+                                                     project=project_select)
+
+                abp = abp.extra({'month': 'plan_year_month'})                
+                
+                abp = abp.values('dw_type','at','month').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+
+                list_abp = list(abp)
+
+                for item in list_abp:
+                    item['at_name'] = u'(予定)'+item['at_name']
+
+                list_ab.extend(list_abp)
+
+        return list_ab
 
 class PlanReusltSumByMonth(ListView):
     model = AccountBook

@@ -9,7 +9,7 @@ APP_NAME = 'app'
 
 urlpatterns = [
     #BaseCreateView
-    url(r'^project/add$', views.BaseCreateView.as_view(template_name='%s/ab_d_form.html' % APP_NAME,
+    url(r'^project/add$', views.BaseCreateView.as_view(template_name='%s/project_form.html' % APP_NAME,
                                                        model=Project,
                                                        form_class=ProjectForm),
         name='project_add'),
@@ -152,5 +152,8 @@ urlpatterns = [
     url(r'^ab/sum$', views.AccountBookSum.as_view(template_name='%s/ab_sum_list.html' % APP_NAME),name='ab_sum'),
     #帳簿集計（月別）
     url(r'^ab/sum_by_month$', views.AccountBookSumByMonth.as_view(template_name='%s/ab_sum_by_month_list.html' % APP_NAME),name='ab_sum_by_month'),
+    #帳簿集計（Project別）
+    url(r'^ab/sum_by_project$', views.AccountBookSumByProject.as_view(template_name='%s/ab_sum_by_project_list.html' % APP_NAME),name='ab_sum_by_project'),
+
 
 ]
