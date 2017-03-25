@@ -579,6 +579,7 @@ class AccountBookSumByMonth(ListView):
         ctx['validator_name'] = validator_name
 
         search_trade_month = self.request.GET.get('search_trade_month','')
+        search_ab_create_flag_check = self.request.GET.get('search_ab_create_flag_check','')
 
         if search_trade_month is None or len(search_trade_month)==0:
             present_month = datetime.date.today().strftime('%Y-%m')
@@ -594,18 +595,39 @@ class AccountBookSumByMonth(ListView):
         if ctx['search_trade_month'] is not None and len(ctx['search_trade_month']) <> 0:
             first_of_thismonth =  datetime.datetime.strptime(ctx['search_trade_month'] + "-01", '%Y-%m-%d')
             last_of_thismonth  = first_of_thismonth + relativedelta(months=1) - timedelta(days=1)
+
+            #AccountBook
             ab = AccountBook.objects.filter(user=self.request.user,
                                             trade_date__range=(first_of_thismonth,last_of_thismonth))
 
             ab_list = ab.values('dw_type').annotate(total_money=Sum('ab_money'))
 
+            #Set AccountBook Money
             for ab_dict in ab_list:
                 #入金
                 if ab_dict['dw_type']=='0':
                     ctx['dw_0_total']   = ab_dict['total_money']
+                #出金
                 else:
                     ctx['dw_1_total']   = ab_dict['total_money']
 
+            if search_ab_create_flag_check=="on":
+                #AccountBookPlan
+                abp = AccountBookPlan.objects.filter(user=self.request.user,
+                                                     plan_year_month=search_trade_month,
+                                                     ab_create_flag="0")
+
+                abp_list = abp.values('dw_type').annotate(total_money=Sum('ab_money'))
+
+                for abp_dict in abp_list:
+                    #入金
+                    if abp_dict['dw_type']=='0':
+                        ctx['dw_0_total']   = ctx['dw_0_total'] + abp_dict['total_money']
+                    #出金
+                    else:
+                        ctx['dw_1_total']   = ctx['dw_1_total'] + abp_dict['total_money']
+
+        ctx['search_ab_create_flag_check'] = self.request.GET.get('search_ab_create_flag_check','')
 
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
@@ -618,6 +640,7 @@ class AccountBookSumByMonth(ListView):
         request_ab_desc = self.request.GET.get('search_ab_desc','')
 
         search_trade_month = self.request.GET.get('search_trade_month','')
+        search_ab_create_flag_check = self.request.GET.get('search_ab_create_flag_check','')
 
         if search_trade_month is None or len(search_trade_month)==0:
             present_month = datetime.date.today().strftime('%Y-%m')
@@ -629,7 +652,28 @@ class AccountBookSumByMonth(ListView):
         ab = AccountBook.objects.filter(user=self.request.user,
                                             trade_date__range=(first_of_thismonth,last_of_thismonth))
 
-        return ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+        ab = ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+
+        list_ab = list(ab)
+
+        if search_ab_create_flag_check=="on":
+            abp = AccountBookPlan.objects.filter(user=self.request.user,
+                                                 plan_year_month=search_trade_month,
+                                                 ab_create_flag="0"
+            )
+
+            abp = abp.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+
+            list_abp = list(abp)
+
+            for item in list_abp:
+                item['at_name'] = u'(予定)'+item['at_name']
+
+            list_ab.extend(list_abp)
+
+        return list_ab
+
+
 
 class PlanReusltSumByMonth(ListView):
     model = AccountBook

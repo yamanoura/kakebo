@@ -24,6 +24,14 @@
 	<input id="search_trade_month" name="search_trade_month" type="month" class="form-control" value="{{ search_trade_month }}">
       </div>
     </div>
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	予定含む：
+      </div>
+      <div class="col-xs-8 col-sm-10">
+	<input type="checkbox" id="search_ab_create_flag_check" name="search_ab_create_flag_check" class="form-control input-lg" {% ifequal search_ab_create_flag_check "on" %}checked="checked"{% endifequal %}>
+      </div>
+    </div>
     <div class="row">      
       <div class="col-xs-12 col-sm-12 text-left">
 	<button type="button" class="btn btn-primary input-lg form-control" onclick="search()">
