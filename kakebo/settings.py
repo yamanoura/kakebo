@@ -99,12 +99,27 @@ WSGI_APPLICATION = 'kakebo.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
+#del-start yama
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#    }
+#}
+#del-end yama
+#add-start yama
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+         'ENGINE': u'django.db.backends.postgresql_psycopg2',
+         'NAME': u'kakebo',
+         'USER': u'kakebo',
+         'PASSWORD' : u'kakebo',
+         'HOST' : '127.0.0.1',
+         'PORT' : 5432,
     }
 }
+#add-end yama
+
 
 #add-start yama
 db_from_env = dj_database_url.config(conn_max_age=400)

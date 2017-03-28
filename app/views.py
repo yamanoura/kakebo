@@ -754,7 +754,7 @@ class AccountBookSumByProject(ListView):
             ab_month_list = AccountBook.objects.filter(user=self.request.user,
                                                        project=project_select)
 
-            ab_month_list = ab_month_list.extra({'month': 'strftime("%%Y-%%m", trade_date)'})
+            ab_month_list = ab_month_list.extra({'month': "to_char(trade_date,'YYYY') || '-' || to_char(trade_date,'MM')"})
 
             ab_month_list = ab_month_list.values('month').annotate(cnt=Count('*'))
 
@@ -762,6 +762,7 @@ class AccountBookSumByProject(ListView):
 
             abp_month_list = None
             abp_month_list_list = None
+
             if search_ab_create_flag_check=="on":
                 #AccountBookPlan 登録されている月がわかる
                 abp_month_list = AccountBookPlan.objects.filter(user=self.request.user,
@@ -805,7 +806,7 @@ class AccountBookSumByProject(ListView):
             ab = AccountBook.objects.filter(user=self.request.user,
                                             project=project_select)
             
-            ab = ab.extra({'month': 'strftime("%%Y-%%m", trade_date)'})
+            ab = ab.extra({'month': "to_char(trade_date,'YYYY') || '-' || to_char(trade_date,'MM')"})
 
             ab = ab.values('dw_type','at','month').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
 
