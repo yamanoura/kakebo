@@ -815,7 +815,8 @@ class AccountBookSumByProject(ListView):
             
             if search_ab_create_flag_check=="on":
                 abp = AccountBookPlan.objects.filter(user=self.request.user,
-                                                     project=project_select)
+                                                     project=project_select,
+                                                     ab_create_flag="0")
 
                 abp = abp.extra({'month': 'plan_year_month'})                
                 
