@@ -66,7 +66,8 @@ class AccountBookDepositForm(ModelForm):
 
         widgets = {
             'trade_date': DateInput(attrs={"type":"date"}),
-            'ab_money': DateInput(attrs={"style":"text-align:right"}),
+            'ab_money': DateInput(attrs={"style":"text-align:right","type":"number"}),
+            
         }
 
     def __init__(self, *args, **kwargs):
@@ -95,7 +96,7 @@ class AccountBookWithdrawalForm(ModelForm):
 
         widgets = {
             'trade_date': DateInput(attrs={"type":"date"}),
-            'ab_money': DateInput(attrs={"style":"text-align:right"}),
+            'ab_money': DateInput(attrs={"style":"text-align:right","type":"number"}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -125,7 +126,7 @@ class AccountBookPlanDepositForm(ModelForm):
 
         widgets = {
             'plan_year_month': DateInput(attrs={"type":"month"}),
-            'ab_money': DateInput(attrs={"style":"text-align:right"}),
+            'ab_money': DateInput(attrs={"style":"text-align:right","type":"number"}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -156,7 +157,7 @@ class AccountBookPlanWithdrawalForm(ModelForm):
 
         widgets = {
             'plan_year_month': DateInput(attrs={"type":"month"}),
-            'ab_money': DateInput(attrs={"style":"text-align:right"}),
+            'ab_money': DateInput(attrs={"style":"text-align:right","type":"number"}),
         }
 
     def __init__(self, *args, **kwargs):
