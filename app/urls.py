@@ -48,6 +48,10 @@ urlpatterns = [
                                                   model=DepositWithdrawalMethod,
                                                   form_class=DepositWithdrawalMethodForm),
         name='dwm_add'),
+    url(r'^gp/add$', views.BaseCreateView.as_view(template_name='%s/gp_form.html' % APP_NAME,
+                                                  model=GeneralParameter,
+                                                  form_class=GeneralParameterForm),
+        name='gp_add'),
 
     #BaseUpdateView
     url(r'^project/edit/(?P<pk>\d+)$', 
@@ -104,6 +108,13 @@ urlpatterns = [
         name='dwm_edit'),
 
 
+    url(r'^gp/edit/(?P<pk>\d+)$',
+        views.BaseUpdateView.as_view(template_name='%s/gp_form.html' % APP_NAME,
+                                     model=GeneralParameter,
+                                     form_class=GeneralParameterForm),
+        name='gp_edit'),
+
+
     #BaseDeleteView
     url(r'^project/delete/(?P<pk>\d+)$', 
         views.BaseDeleteView.as_view(model=Project),
@@ -134,6 +145,12 @@ urlpatterns = [
                                      template_name='%s/ba_confirm_delete.html' % APP_NAME),
         name='ba_delete'),
 
+    #汎用パラメーター
+    url(r'^gp/delete/(?P<pk>\d+)$', 
+        views.BaseDeleteView.as_view(model=GeneralParameter,
+                                     template_name='%s/gp_confirm_delete.html' % APP_NAME),
+        name='gp_delete'),
+
 
     #BaseListView
     url(r'^project/search$', views.ProjectSearch.as_view(template_name='%s/project_list.html' % APP_NAME),name='project_search'),
@@ -147,6 +164,7 @@ urlpatterns = [
 
     url(r'^ba/search$', views.BankAccountSearch.as_view(template_name='%s/ba_list.html' % APP_NAME),name='ba_search'),
     url(r'^dwm/search$', views.DepositWithdrawalMethodSearch.as_view(template_name='%s/dwm_list.html' % APP_NAME),name='dwm_search'),
+    url(r'^gp/search$', views.GeneralParameterSearch.as_view(template_name='%s/gp_list.html' % APP_NAME),name='gp_search'),
 
     #帳簿集計（日別）
     url(r'^ab/sum$', views.AccountBookSum.as_view(template_name='%s/ab_sum_list.html' % APP_NAME),name='ab_sum'),

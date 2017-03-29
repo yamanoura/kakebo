@@ -508,6 +508,43 @@ class AccountBookPlanSearch(ListView):
 
         return ab
 
+
+##汎用パラメーター検索
+class GeneralParameterSearch(ListView):
+    model = GeneralParameter
+    paginate_by = 5
+
+    def dispatch(self,request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/common/login/?next=%s' % request.path)
+        else:
+            return super(GeneralParameterSearch, self).dispatch(request,*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super(GeneralParameterSearch,self).get_context_data(**kwargs)
+        ctx['search_desc'] = self.get_param('search_desc')
+        ctx['validator_name'] = self.get_template_name() + '.js'
+
+        #共通設定
+        ctx['is_logined'] = True
+        ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
+
+        return ctx
+
+    def get_queryset(self):
+        search_desc = self.get_param('search_desc')
+
+        return GeneralParameter.objects.filter(desc__contains=search_desc).order_by('sort_no')
+
+    def get_template_name(self):
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name)
+        return validator_name
+
+    def get_param(self,param_name):
+        return self.request.GET.get(param_name,'')
+
 class AccountBookSum(ListView):
     model = AccountBook
 

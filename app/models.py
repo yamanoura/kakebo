@@ -162,3 +162,32 @@ class AccountBookPlan(models.Model):
     def __unicode__(self):
         return u"{}".format(self.ab_desc)
     
+
+
+#汎用パラメータ
+class GeneralParameter(models.Model):
+    user = models.ForeignKey(User)
+    desc = models.CharField(u'説明',
+                            default=None,
+                            max_length=100)
+    sort_no = models.IntegerField(u'表示順',
+                                  default=1,
+                                  validators=[MinValueValidator(1), MaxValueValidator(999)])
+    param1 = models.CharField(u'パラメータ1',
+                              blank=True,
+                              null=True,
+                              max_length=10)
+    param2 = models.CharField(u'パラメータ2',
+                              blank=True,
+                              null=True,
+                              max_length=10)
+    param3 = models.CharField(u'パラメータ3',
+                              blank=True,
+                              null=True,
+                              max_length=10)
+
+    def __str__(self):
+        return self.desc
+
+    def __unicode__(self):
+        return u"{}".format(self.desc)

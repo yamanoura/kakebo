@@ -171,3 +171,18 @@ class AccountBookPlanWithdrawalForm(ModelForm):
         self.fields["ab_create_flag"].widget = forms.HiddenInput()
 
 
+#汎用パラメーター
+class GeneralParameterForm(ModelForm):
+    user = None
+    class Meta:
+        model = GeneralParameter
+        fields = ("desc",
+                  "sort_no",
+                  "param1",
+                  "param2",
+                  "param3",
+        )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super(GeneralParameterForm, self).__init__(*args, **kwargs)

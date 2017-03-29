@@ -9,4 +9,5 @@ admin.site.register(AccountBook)
 admin.site.register(AccountBookPlan)
 admin.site.register(BankAccount)
 admin.site.register(DepositWithdrawalMethod)
+admin.site.register(GeneralParameter)
 

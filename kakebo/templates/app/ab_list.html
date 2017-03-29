@@ -139,9 +139,9 @@
     <td>{{ item.at  }}</td>
     <td>
       {% ifequal item.dw_type "0" %}
-      <a href="/app/ab_d/edit/{{ item.id }}">{{ item.ab_desc }}
+      <a href="/app/ab_d/edit/{{ item.id }}">{{ item.ab_desc }}</a>
       {% else %}
-      <a href="/app/ab_w/edit/{{ item.id }}">{{ item.ab_desc }}
+      <a href="/app/ab_w/edit/{{ item.id }}">{{ item.ab_desc }}</a>
       {% endifequal %}
     </td>
     <td><div align="right">{{ item.ab_money|intcomma  }}</div></td>
