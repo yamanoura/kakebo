@@ -922,7 +922,7 @@ class AccountBookSumByYear(ListView):
         #AccountBook
         ab = self.get_queryset_ab(self.request.user,search_trade_year)
         if ab is not None:
-            ab = ab.values('dw_type','at').annotate(
+            ab = ab.values('dw_type').annotate(
                 at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
 
         #AccountBookPlan
@@ -930,7 +930,7 @@ class AccountBookSumByYear(ListView):
         if search_ab_create_flag_check=="on":
             abp = self.get_queryset_abp(self.request.user,search_trade_year)
             if abp is not None:
-                abp = abp.values('dw_type','at').annotate(
+                abp = abp.values('dw_type').annotate(
                     at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
 
         ab_dw0 = 0
