@@ -943,11 +943,13 @@ class AccountBookSumByYear(ListView):
 
         abp_dw0 = 0
         abp_dw1 = 0
-        for item in abp:
-            if item['dw_type']=='0':
-                abp_dw0 = item['sum_money']
-            else:
-                abp_dw1 = item['sum_money']
+
+        if abp is not None:
+            for item in abp:
+                if item['dw_type']=='0':
+                    abp_dw0 = item['sum_money']
+                else:
+                    abp_dw1 = item['sum_money']
 
         ctx['dw_0_total'] = ab_dw0 + abp_dw0
         ctx['dw_1_total'] = ab_dw1 + abp_dw1
