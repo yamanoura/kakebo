@@ -1,0 +1,122 @@
+{% extends 'common/base.html' %}
+{% load bootstrap %}
+{% load humanize %}
+
+{% block title %}帳簿集計(月別){% endblock %}
+
+{% block page_name %}
+帳簿集計(月別)
+{% endblock %}
+
+{% block page_desc %}
+帳簿の集計(月別)を行う
+{% endblock %}
+
+{% block main %}
+<form method="get" action="" name="search_form" id="search_form">
+  {% csrf_token %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	取引年月：
+      </div>
+      <div class="col-xs-8 col-sm-10">
+	<input id="search_trade_month" name="search_trade_month" type="month" class="form-control" value="{{ search_trade_month }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	予定含む：
+      </div>
+      <div class="col-xs-8 col-sm-10">
+	<input type="checkbox" id="search_ab_create_flag_check" name="search_ab_create_flag_check" class="form-control input-lg" {% ifequal search_ab_create_flag_check "on" %}checked="checked"{% endifequal %}>
+      </div>
+    </div>
+    <div class="row">      
+      <div class="col-xs-12 col-sm-12 text-left">
+	<button type="button" class="btn btn-primary input-lg form-control" onclick="search()">
+	  検索
+	</button>
+      </div>
+    </div>
+  </div>
+</form>
+{% if is_paginated %}
+<div class="pagination">
+  <span class="step-link">
+    {% if page_obj.has_previous %}
+    <a href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">previous</a>
+    {% endif %}
+    <span class="page-current">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?{{ query_string }}&page={{ page_obj.next_page_number }}">next</a>
+    {% endif %}
+  </span>
+</div>
+{% else %}
+<br>
+{% endif %}
+<table border="0" width="100%">
+  <tr>
+    <td valign="top">
+      <table class="table table-bordered table-striped">
+	<tr>
+	  <th colspan="2" class="text-center bg-primary">入金</th>
+	</tr>
+	<tr>
+	  <th class="text-center bg-info">科目</th>
+	  <th class="text-center bg-info">金額</th>
+	</tr>
+	{% for item in object_list %}
+	{% ifequal item.dw_type "0" %}
+	<tr>
+	  <td>{{ item.at_name }}</td>
+	  <td><div align="right">{{ item.sum_money|intcomma }}</div></td>
+	</tr>
+	{% endifequal %}
+	{% endfor %}
+      </table>
+    </td>
+    <td valign="top">
+      <table class="table table-bordered table-striped">
+	<tr>
+	  <th colspan="2" class="text-center bg-primary">出金</th>
+	</tr>
+	<tr>
+	  <th class="text-center bg-info">科目</th>
+	  <th class="text-center bg-info">金額</th>
+	</tr>
+	{% for item in object_list %}
+	{% ifequal item.dw_type "1" %}
+	<tr>
+	  <td>{{ item.at_name }}</td>
+	  <td><div align="right">{{ item.sum_money|intcomma }}</div></td>
+	</tr>
+	{% endifequal %}
+	{% endfor %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <table class="table table-bordered table-striped">
+	<tr>
+	  <th class="text-center bg-info">合計</th>
+	  <th class="text-center bg-default"><div align="right">{{ dw_0_total|intcomma }}</div></th>
+	</tr>
+      </table>
+    </td>
+    <td>
+      <table class="table table-bordered table-striped">
+	<tr>
+	  <th class="text-center bg-info">合計</th>
+	  <th class="text-center bg-default"><div align="right">{{ dw_1_total|intcomma }}</div></th>
+	</tr>
+      </table>
+    </td>
+  </tr>
+
+</table>
+{% endblock %}

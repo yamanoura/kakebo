@@ -176,7 +176,8 @@ class GeneralParameterForm(ModelForm):
     user = None
     class Meta:
         model = GeneralParameter
-        fields = ("desc",
+        fields = ("name",
+                  "desc",
                   "sort_no",
                   "param1",
                   "param2",

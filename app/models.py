@@ -167,6 +167,9 @@ class AccountBookPlan(models.Model):
 #汎用パラメータ
 class GeneralParameter(models.Model):
     user = models.ForeignKey(User)
+    name = models.CharField(u'汎用パラメータ名',
+                            default=None,
+                            max_length=20)
     desc = models.CharField(u'説明',
                             default=None,
                             max_length=100)

@@ -170,6 +170,8 @@ urlpatterns = [
     url(r'^ab/sum$', views.AccountBookSum.as_view(template_name='%s/ab_sum_list.html' % APP_NAME),name='ab_sum'),
     #帳簿集計（月別）
     url(r'^ab/sum_by_month$', views.AccountBookSumByMonth.as_view(template_name='%s/ab_sum_by_month_list.html' % APP_NAME),name='ab_sum_by_month'),
+    #帳簿集計（年度別）
+    url(r'^ab/sum_by_year$', views.AccountBookSumByYear.as_view(template_name='%s/ab_sum_by_year_list.html' % APP_NAME),name='ab_sum_by_year'),
     #帳簿集計（Project別）
     url(r'^ab/sum_by_project$', views.AccountBookSumByProject.as_view(template_name='%s/ab_sum_by_project_list.html' % APP_NAME),name='ab_sum_by_project'),
 

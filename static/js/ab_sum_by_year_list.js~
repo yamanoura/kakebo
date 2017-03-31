@@ -1,0 +1,12 @@
+function search(){
+    var st_year = $('#search_trade_year').val()
+
+    if(vmonth(st_month)){
+	var target = document.getElementById("search_form");
+	target.method = 'get'
+	target.submit();
+    }else{
+	alert('利用できない年度が入力されました')
+    }
+}
+

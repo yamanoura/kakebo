@@ -868,76 +868,159 @@ class AccountBookSumByProject(ListView):
 
         return list_ab
 
-class PlanReusltSumByMonth(ListView):
+
+#帳簿集計(Project別)
+class AccountBookSumByYear(ListView):
     model = AccountBook
 
     def dispatch(self,request, *args, **kwargs):
         if not request.user.is_authenticated():
             return HttpResponseRedirect('/common/login/?next=%s' % request.path)
         else:
-            return super(AccountBookSumByMonth, self).dispatch(request,*args, **kwargs)
+            return super(AccountBookSumByYear, self).dispatch(request,*args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        ctx = super(AccountBookSumByMonth,self).get_context_data(**kwargs)
-
-        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
-        validator_name = re.sub(r'.html$','',template_file_name) + '.js'
-
-        ctx['validator_name'] = validator_name
-
-        search_trade_month = self.request.GET.get('search_trade_month','')
-
-        if search_trade_month is None or len(search_trade_month)==0:
-            present_month = datetime.date.today().strftime('%Y-%m')
-            ctx['search_trade_month']   = present_month
-        else:
-            ctx['search_trade_month']   = search_trade_month
-
-        ctx['search_ab_desc']   = self.request.GET.get('search_ab_desc','')
-
-        ctx['dw_0_total'] = 0
-        ctx['dw_1_total'] = 0
-
-        if ctx['search_trade_month'] is not None and len(ctx['search_trade_month']) <> 0:
-            first_of_thismonth =  datetime.datetime.strptime(ctx['search_trade_month'] + "-01", '%Y-%m-%d')
-            last_of_thismonth  = first_of_thismonth + relativedelta(months=1) - timedelta(days=1)
-            ab = AccountBook.objects.filter(user=self.request.user,
-                                            trade_date__range=(first_of_thismonth,last_of_thismonth))
-
-            ab_list = ab.values('dw_type').annotate(total_money=Sum('ab_money'))
-
-            for ab_dict in ab_list:
-                #入金
-                if ab_dict['dw_type']=='0':
-                    ctx['dw_0_total']   = ab_dict['total_money']
-                else:
-                    ctx['dw_1_total']   = ab_dict['total_money']
-
-
+    def set_common_ctx(self,ctx):
+        template_file_name = self.get_template_name()
+        ctx['validator_name'] = template_file_name + '.js'
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
 
+    def set_eachdefault_ctx(self,ctx):
+        ##
+        ctx['search_ab_create_flag_check'] = self.get_param('search_ab_create_flag_check')
+        search_project_select = self.get_param('search_project_select')
+        # templateの組み込みタグでの比較を行うために数値変換を行う
+        if(search_project_select!=""):
+            search_project_select = int(search_project_select)
+
+        ctx['search_project_select'] = search_project_select
+        
+        ##
+        search_project = Project.objects.filter(user=self.request.user)
+        ctx['search_project'] = search_project
+
+        ##
+        ctx['search_trade_year'] = self.get_param('search_trade_year')
+        if ctx['search_trade_year'] == '':
+            bom = get_bom(ctx['userid'])
+            this_fiscal_year = get_this_fiscal_year(None,bom)
+            ctx['search_trade_year'] = this_fiscal_year
+
+        ##
+        ctx['dw_0_total'] = 0
+        ctx['dw_1_total'] = 0
+
+    def get_context_data(self, **kwargs):
+        ctx = super(AccountBookSumByYear,self).get_context_data(**kwargs)
+        self.set_common_ctx(ctx)
+        self.set_eachdefault_ctx(ctx)
+
+        search_trade_year = ctx['search_trade_year']
+        search_ab_create_flag_check = ctx['search_ab_create_flag_check']
+
+        #AccountBook
+        ab = self.get_queryset_ab(self.request.user,search_trade_year)
+        if ab is not None:
+            ab = ab.values('dw_type','at').annotate(
+                at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+
+        #AccountBookPlan
+        abp = None
+        if search_ab_create_flag_check=="on":
+            abp = self.get_queryset_abp(self.request.user,search_trade_year)
+            if abp is not None:
+                abp = abp.values('dw_type','at').annotate(
+                    at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+
+        ab_dw0 = 0
+        ab_dw1 = 0
+        for item in ab:
+            if item['dw_type']=='0':
+                ab_dw0 = item['sum_money']
+            else:
+                ab_dw1 = item['sum_money']
+
+        abp_dw0 = 0
+        abp_dw1 = 0
+        for item in abp:
+            if item['dw_type']=='0':
+                abp_dw0 = item['sum_money']
+            else:
+                abp_dw1 = item['sum_money']
+
+        ctx['dw_0_total'] = ab_dw0 + abp_dw0
+        ctx['dw_1_total'] = ab_dw1 + abp_dw1
+
         return ctx
 
+    def get_queryset_ab(self,userid,search_trade_year):
+        bom = get_bom(userid)
+        first_date_s = search_trade_year + '-' + bom + '-01'
+        first_date_d = datetime.datetime.strptime(first_date_s,'%Y-%m-%d')
+        last_date_d  = first_date_d + relativedelta(years=1) - timedelta(days=1)
+        return AccountBook.objects.filter(user=self.request.user,
+                                          trade_date__range=(first_date_d,last_date_d))
+
+    def get_queryset_abp(self,userid,search_trade_year):
+        bom = get_bom(userid)
+        first_date_s = search_trade_year + '-' + bom + '-01'
+        first_date_d = datetime.datetime.strptime(first_date_s,'%Y-%m-%d')
+        last_date_d  = first_date_d + relativedelta(years=1) - timedelta(days=1)
+        last_year_month = last_date_d.strftime('%Y-%m')
+        first_year_month = search_trade_year + '-' + bom
+
+        return AccountBookPlan.objects.filter(user=self.request.user,
+                                              plan_year_month__range=(first_year_month,last_year_month))
+
     def get_queryset(self):
-        request_trade_month = self.request.GET.get('search_trade_month','')
-        request_ab_desc = self.request.GET.get('search_ab_desc','')
+        search_project_select = self.get_param('search_project_select')
+        search_ab_create_flag_check = self.get_param('search_ab_create_flag_check')
+        search_trade_year = self.get_param('search_trade_year')
 
-        search_trade_month = self.request.GET.get('search_trade_month','')
+        if search_trade_year == '':
+            bom = get_bom(self.request.user)
+            search_trade_year = get_this_fiscal_year(None,bom)
 
-        if search_trade_month is None or len(search_trade_month)==0:
-            present_month = datetime.date.today().strftime('%Y-%m')
-            search_trade_month   = present_month
+        rtn_list = []
+        #AccountBook
+        ab_list = None
+        ab = self.get_queryset_ab(self.request.user,search_trade_year)
+        if ab is not None:
+            ab = ab.extra({'year': "to_char(trade_date,'YYYY')"})
+            ab = ab.values('dw_type','at','year').annotate(
+                at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+            ab_list = list(ab)
 
-        first_of_thismonth =  datetime.datetime.strptime(search_trade_month + "-01", '%Y-%m-%d')
-        last_of_thismonth  = first_of_thismonth + relativedelta(months=1) - timedelta(days=1)
+        #AccountBookPlan
+        abp_list = None
+        abp = None
+        if search_ab_create_flag_check=="on":
+            abp = self.get_queryset_abp(self.request.user,search_trade_year)
+            if abp is not None:
+                abp = abp.extra({'year': "substr(plan_year_month,1,4)"})
+                abp = abp.values('dw_type','at','year').annotate(
+                    at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+                abp_list = list(abp)
 
-        ab = AccountBook.objects.filter(user=self.request.user,
-                                            trade_date__range=(first_of_thismonth,last_of_thismonth))
+        if ab_list is not None:
+            rtn_list.extend(ab_list)
 
-        return ab.values('dw_type','at').annotate(at_name=Max('at__at_name'),sum_money=Sum('ab_money')).order_by('dw_type')
+        if abp_list is not None:
+            for item in abp_list:
+                item['at_name'] = u'(予定)'+item['at_name']
 
+            rtn_list.extend(abp_list)
+
+        return rtn_list
+
+    def get_template_name(self):
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name)
+        return validator_name
+
+    def get_param(self,param_name):
+        return self.request.GET.get(param_name,'')
 
 
 def info(msg):
@@ -962,3 +1045,29 @@ def get_defaultyearmonth(v_year_month):
     else:
         return v_year_month
 
+#今年度の取得
+def get_this_fiscal_year(v_date,v_bom):
+    v_year_month = None
+    if v_date is not None:
+        v_year_month = v_date[0:7]
+
+    year_month = get_defaultyearmonth(v_year_month)
+
+    adjust_num = -1 * (int(v_bom) - 1)
+
+    base_date_s = year_month + '-01'
+    base_date_d = datetime.datetime.strptime(base_date_s,'%Y-%m-%d')
+    adjust_result_date = base_date_d + relativedelta(months=adjust_num)
+    this_fiscal_year = adjust_result_date.strftime('%Y')
+
+    return this_fiscal_year
+
+def get_bom(userid):
+    gp_bom = GeneralParameter.objects.filter(user=userid,
+                                             name='bom')
+    bom = None
+    for item in gp_bom:
+        bom = item.param1
+        
+    return bom
+    
