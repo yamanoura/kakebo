@@ -973,6 +973,7 @@ class AccountBookSumByYear(ListView):
         first_year_month = search_trade_year + '-' + bom
 
         return AccountBookPlan.objects.filter(user=self.request.user,
+                                              ab_create_flag='0',
                                               plan_year_month__range=(first_year_month,last_year_month))
 
     def get_queryset(self):
