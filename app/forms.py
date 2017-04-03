@@ -42,6 +42,9 @@ class DepositWithdrawalMethodForm(ModelForm):
         fields = ("dwm_name",
                   "dwm_type",
                   "ba",
+                  "closing_deadline",
+                  "pay_deadline_month",
+                  "pay_deadline_day",
         )
 
     def __init__(self, *args, **kwargs):

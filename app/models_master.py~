@@ -10,7 +10,7 @@ from .constant import *
 
 import datetime
 
-#from .models_master import *
+from .model_master import *
 
 # Create your models here.
 #Project情報
@@ -49,7 +49,7 @@ class BankAccount(models.Model):
     def __unicode__(self):
         return u"{}".format(self.ba_name)
 
-#入出金方法
+#収入支出方法
 class DepositWithdrawalMethod(models.Model):
     user = models.ForeignKey(User)
     dwm_name = models.CharField(u'入出金方法名',max_length=50)
@@ -66,24 +66,6 @@ class DepositWithdrawalMethod(models.Model):
                             null=True,
                             verbose_name=u'銀行口座名'
     )
-
-    closing_deadline = models.IntegerField(u'締め日',
-                                           blank=True,
-                                           null=True,
-                                           validators=[MinValueValidator(1), MaxValueValidator(31)]
-    )
-
-    pay_deadline_month = models.IntegerField(u'支払期日(締め後月数)',
-                                       blank=True,
-                                       null=True,
-                                       validators=[MinValueValidator(0), MaxValueValidator(12)]
-    )    
-
-    pay_deadline_day = models.IntegerField(u'支払期日(締め後日数)',
-                                       blank=True,
-                                       null=True,
-                                       validators=[MinValueValidator(1), MaxValueValidator(31)]
-    )    
 
     def __str__(self):
         return self.dwm_name
