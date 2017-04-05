@@ -22,6 +22,7 @@ import logging
 from django.db.models import Sum
 from django.db.models import Max
 from django.db.models import Count
+from django.db.models import Case,When,Value
 import re
 
 APP_NAME     = 'app'
@@ -51,7 +52,6 @@ class BaseCreateView(BaseView,CreateView):
             return super(class_object, self).dispatch(request,*args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        info('get_context_date')
         ctx = super(BaseCreateView,self).get_context_data(**kwargs)
 
         template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
@@ -65,22 +65,60 @@ class BaseCreateView(BaseView,CreateView):
         return ctx
 
     def get_form_kwargs(self):
-        info('get_form_kwargs')
         class_object = self.get_object()
         kwargs = super(BaseCreateView, self).get_form_kwargs()
+
         kwargs['user'] = self.request.user
         return kwargs
 
     def form_valid(self, form):
-        info('form_valid')
         class_object = self.get_object()
         form.instance.user = self.request.user
+
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        template_name = re.sub(r'.html$','',template_file_name)
+
+        if template_name=='ab_d_form':
+            form_trade_date = form.instance.trade_date
+            form_dwm_id = form.instance.dwm_id
+            form_dw_type = form.instance.dw_type
+            form_ab_desc = form.instance.ab_desc
+            form_ab_money = form.instance.ab_money
+
+            form_ba_list = DepositWithdrawalMethod.objects.filter(user=self.request.user,
+                                                             id=form_dwm_id).values('ba')
+            form_ba = None
+            form_ba_id = 0
+
+            for item in form_ba_list:
+                form_ba_id = item['ba']
+
+            if form_ba_id is not None:
+                form_ba = BankAccount.objects.filter(user=self.request.user,
+                                                     id=form_ba_id)
+                bab = BankAccountBalance(user=self.request.user,
+                                         trade_date=form_trade_date,
+                                         ba_id=form_ba_id,
+                                         dw_type=form_dw_type,
+                                         desc=form_ab_desc,
+                                         money=form_ab_money
+                )
+
+                bab.save()
+
+                form.instance.bab = bab
 
         return super(class_object, self).form_valid(form) 
         return render(self.request,self.template_name,
                       self.get_context_data(form=form))
 
+    def get_template_name(self):
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name)
+        return validator_name
 
+    def get_param(self,param_name):
+        return self.request.GET.get(param_name,'')
         
 class BaseUpdateView(UpdateView):
     success_url = SUCCESS_URL
@@ -106,9 +144,10 @@ class BaseUpdateView(UpdateView):
 
         class_object = self.get_object()
         template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
-        validator_name = re.sub(r'.html$','',template_file_name)
+        template_name = re.sub(r'.html$','',template_file_name)
 
-        if (validator_name == 'ab_plan_w_form' or validator_name == 'ab_plan_d_form') and class_object.ab_create_flag=='1':
+
+        if (template_name == 'ab_plan_w_form' or template_name == 'ab_plan_d_form') and class_object.ab_create_flag=='1':
             set_at = AccountTitle(user=self.request.user,
                               id=class_object.at.id
             )
@@ -125,6 +164,31 @@ class BaseUpdateView(UpdateView):
                                   id=class_object.project.id
                 )
 
+                if template_name == 'ab_plan_d_form':
+                    form_ba_list = DepositWithdrawalMethod.objects.filter(user=self.request.user,
+                                                                          id=class_object.dwm.id).values('ba')
+
+                    form_ba = None
+                    form_ba_id = None
+                    set_bab = None
+                    for item in form_ba_list:
+                        form_ba_id = item['ba']
+
+                    if form_ba_id is not None:
+                        form_ba = BankAccount.objects.filter(user=self.request.user,
+                                                             id=form_ba_id)
+
+                        set_bab = BankAccountBalance(user=self.request.user,
+                                                 trade_date=get_defaultdate(None),
+                                                 dw_type=class_object.dw_type,
+                                                 ba_id=form_ba_id,
+                                                 desc=class_object.ab_desc,
+                                                 money=class_object.ab_money
+                        )
+
+                        set_bab.save()
+
+
             ab = AccountBook(user=self.request.user,
                         trade_date=get_defaultdate(None),
                         dw_type=class_object.dw_type,
@@ -132,11 +196,56 @@ class BaseUpdateView(UpdateView):
                         dwm=set_dwm,
                         project=set_project,
                         ab_desc=class_object.ab_desc,
-                        ab_money=class_object.ab_money
+                        ab_money=class_object.ab_money,
+                        bab=set_bab
             )
 
             ab.save()
 
+
+        if template_name=='ab_d_form':
+            form_trade_date = form.instance.trade_date
+            form_dwm_id = form.instance.dwm_id
+            form_dw_type = form.instance.dw_type
+            form_ab_desc = form.instance.ab_desc
+            form_ab_money = form.instance.ab_money
+            form_bab_id = form.instance.bab_id
+
+            form_ba_list = DepositWithdrawalMethod.objects.filter(user=self.request.user,
+                                                                  id=form_dwm_id).values('ba')
+            form_ba = None
+            for item in form_ba_list:
+                form_ba_id = item['ba']
+
+            if form_ba_id is not None:
+                form_ba = BankAccount.objects.filter(user=self.request.user,
+                                                     id=form_ba_id)
+
+                if form_bab_id is not None:
+                    form_bab = BankAccountBalance.objects.get(pk=form_bab_id)
+                    form_bab.trade_date = form_trade_date
+                    form_bab.dw_type = form_dw_type
+                    form_bab.ba_id = form_ba_id
+                    form_bab.desc = form_ab_desc
+                    form_bab.money = form_ab_money
+                    form_bab.save()
+                else:
+                    bab = BankAccountBalance(user=self.request.user,
+                                             trade_date=form_trade_date,
+                                             ba_id=form_ba_id,
+                                             dw_type=form_dw_type,
+                                             desc=form_ab_desc,
+                                             money=form_ab_money
+                    )
+
+                    bab.save()
+                    form.instance.bab = bab
+            else:
+                form.instance.bab = None
+
+                if form_bab_id is not None:
+                    form_bab = BankAccountBalance.objects.get(pk=form_bab_id)
+                    form_bab.delete()
 
         return super(BaseUpdateView, self).form_valid(form) 
         return render(self.request,self.template_name,
@@ -869,7 +978,7 @@ class AccountBookSumByProject(ListView):
         return list_ab
 
 
-#帳簿集計(Project別)
+#帳簿集計(年度別)
 class AccountBookSumByYear(ListView):
     model = AccountBook
 
@@ -1021,6 +1130,72 @@ class AccountBookSumByYear(ListView):
     def get_param(self,param_name):
         return self.request.GET.get(param_name,'')
 
+#口座残高照会
+class BankAccountBalanceInquiry(ListView):
+    model = BankAccountBalance
+
+    def dispatch(self,request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/common/login/?next=%s' % request.path)
+        else:
+            return super(BankAccountBalanceInquiry, self).dispatch(request,*args, **kwargs)
+
+    def set_common_ctx(self,ctx):
+        template_file_name = self.get_template_name()
+        ctx['validator_name'] = template_file_name + '.js'
+        ctx['is_logined'] = True
+        ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
+
+    def set_eachdefault_ctx(self,ctx):
+        ##
+        ctx['dw_0_total'] = 0
+        ctx['dw_1_total'] = 0
+
+    def get_context_data(self, **kwargs):
+        ctx = super(BankAccountBalanceInquiry,self).get_context_data(**kwargs)
+        self.set_common_ctx(ctx)
+        self.set_eachdefault_ctx(ctx)
+
+        BankAccountBalance.objects.filter(user=self.request.user,
+                           dw_type=1).delete()
+
+        bab = self.get_queryset_bab(self.request.user)
+        if bab is not None:
+            bab = bab.values('ba').annotate(sum_money=Sum('money')).order_by('ba')
+
+        ab = AccountBook.objects.filter(user=self.request.user,dw_type='1').exclude(dwm__ba=None)
+        ab = ab.values('dwm__ba').annotate(ba_name=Max('dwm__ba__ba_name'),sum_money=Sum('ab_money'))
+
+        for item in ab:
+            set_bab = BankAccountBalance(user=self.request.user,
+                                         trade_date=get_defaultdate(None),
+                                         dw_type='1',
+                                         ba_id=item['dwm__ba'],
+                                         desc=u'引き落し',
+                                         money=int(item['sum_money'])*-1)
+
+            set_bab.save()
+
+        return ctx
+
+    def get_queryset_bab(self,userid):
+        bab = BankAccountBalance.objects.filter(user=self.request.user)
+        return bab
+
+    def get_queryset(self):
+        bab = self.get_queryset_bab(self.request.user)
+        bab = bab.values('ba').annotate(ba_name=Max('ba__ba_name'),sum_money=Sum('money'))
+
+        return bab
+
+    def get_template_name(self):
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name)
+        return validator_name
+
+    def get_param(self,param_name):
+        return self.request.GET.get(param_name,'')
 
 def info(msg):
     logger = logging.getLogger('command')

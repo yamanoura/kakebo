@@ -174,6 +174,7 @@ urlpatterns = [
     url(r'^ab/sum_by_year$', views.AccountBookSumByYear.as_view(template_name='%s/ab_sum_by_year_list.html' % APP_NAME),name='ab_sum_by_year'),
     #帳簿集計（Project別）
     url(r'^ab/sum_by_project$', views.AccountBookSumByProject.as_view(template_name='%s/ab_sum_by_project_list.html' % APP_NAME),name='ab_sum_by_project'),
-
+    #口座残高照会
+    url(r'^bab/inquiry$', views.BankAccountBalanceInquiry.as_view(template_name='%s/bab_inquiry.html' % APP_NAME),name='bab_inquiry'),
 
 ]

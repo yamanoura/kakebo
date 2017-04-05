@@ -91,6 +91,40 @@ class DepositWithdrawalMethod(models.Model):
     def __unicode__(self):
         return u"{}".format(self.dwm_name)
 
+
+class BankAccountBalance(models.Model):
+    user = models.ForeignKey(User)
+    trade_date = models.DateField(u'取引日',
+                                    blank=True,
+                                    null=True,
+                                    default=timezone.now())    
+
+    dw_type = models.CharField(u'入出金種類',
+                               max_length=1,
+                               default=1,
+                               choices=DEPOSIT_WITHDRAWAL_TYPE_DEFINE
+    )
+
+    ba =  models.ForeignKey(BankAccount,
+                            verbose_name=u'銀行口座名'
+    )
+
+
+    desc = models.CharField(u'説明',
+                            max_length=100
+    )
+
+    money = models.IntegerField(u'金額',
+                                validators=[MinValueValidator(-99999999), MaxValueValidator(99999999)]
+    )
+
+    def __str__(self):
+        return self.desc
+
+    def __unicode__(self):
+        return u"{}".format(self.desc)
+
+
 #帳簿
 class AccountBook(models.Model):
     user = models.ForeignKey(User)
@@ -124,7 +158,14 @@ class AccountBook(models.Model):
     )
 
     ab_money = models.IntegerField(u'帳簿金額',
-                                        validators=[MinValueValidator(1), MaxValueValidator(99999999)]
+                                   validators=[MinValueValidator(1), MaxValueValidator(99999999)]
+    )
+
+    bab = models.ForeignKey(BankAccountBalance,
+                            models.SET_NULL,
+                            blank=True,
+                            null=True,
+                            verbose_name=u'銀行口座残高'
     )
     
     def __str__(self):

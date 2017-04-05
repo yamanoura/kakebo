@@ -10,4 +10,4 @@ admin.site.register(AccountBookPlan)
 admin.site.register(BankAccount)
 admin.site.register(DepositWithdrawalMethod)
 admin.site.register(GeneralParameter)
-
+admin.site.register(BankAccountBalance)
