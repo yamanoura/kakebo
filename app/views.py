@@ -164,29 +164,28 @@ class BaseUpdateView(UpdateView):
                                   id=class_object.project.id
                 )
 
-                if template_name == 'ab_plan_d_form':
-                    form_ba_list = DepositWithdrawalMethod.objects.filter(user=self.request.user,
-                                                                          id=class_object.dwm.id).values('ba')
+            set_bab = None
+            if template_name == 'ab_plan_d_form':
+                form_ba_list = DepositWithdrawalMethod.objects.filter(user=self.request.user,
+                                                                      id=class_object.dwm.id).values('ba')
 
-                    form_ba = None
-                    form_ba_id = None
-                    set_bab = None
-                    for item in form_ba_list:
-                        form_ba_id = item['ba']
+                form_ba = None
+                form_ba_id = None
+                for item in form_ba_list:
+                    form_ba_id = item['ba']
+                    
+                if form_ba_id is not None:
+                    form_ba = BankAccount.objects.filter(user=self.request.user,
+                                                         id=form_ba_id)
 
-                    if form_ba_id is not None:
-                        form_ba = BankAccount.objects.filter(user=self.request.user,
-                                                             id=form_ba_id)
-
-                        set_bab = BankAccountBalance(user=self.request.user,
+                    set_bab = BankAccountBalance(user=self.request.user,
                                                  trade_date=get_defaultdate(None),
                                                  dw_type=class_object.dw_type,
                                                  ba_id=form_ba_id,
                                                  desc=class_object.ab_desc,
                                                  money=class_object.ab_money
-                        )
-
-                        set_bab.save()
+                    )
+                    set_bab.save()
 
 
             ab = AccountBook(user=self.request.user,
@@ -460,7 +459,7 @@ class AccountBookSearch(ListView):
 
         ctx['search_project'] = Project.objects.filter(user=self.request.user,
                                                        project_status=0)
-        
+
         if search_dw_type_select == '':
             ctx['search_at'] = None
             ctx['search_dw_type_select'] = ''
