@@ -1,0 +1,37 @@
+{% extends 'common/base.html' %}
+{% load bootstrap %}
+
+{% block title %}データパターン削除{% endblock %}
+
+{% block page_name %}
+データパターン削除
+{% endblock %}
+
+{% block page_desc %}
+データパターンの削除を行う
+{% endblock %}
+
+{% block main %}
+<form method="post">
+  {% csrf_token %}
+  <div class="container">
+    <div class="row">
+      <div class="text-left">
+	<p>"{{ object }}"を削除しますが、よろしいでしょうか？</p>
+	<button type="submit" class="btn btn-primary input-lg form-control">
+	  削除
+	</button>
+      </div>
+    </div>
+    <br>
+    <br>
+    <div class="row">
+      <div class="text-left">
+	<button type="button" onclick="history.back()" class="btn btn-default input-lg form-control">
+	  キャンセル
+	</button>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

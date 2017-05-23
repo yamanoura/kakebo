@@ -256,3 +256,68 @@ class GeneralParameter(models.Model):
     def __unicode__(self):
         return u"{}".format(self.desc)
 
+
+#データパターンマスタ
+class DataPattern(models.Model):
+    user = models.ForeignKey(User)
+    at   = models.ForeignKey(AccountTitle,
+                             verbose_name=u'勘定科目'
+    )
+
+    dp_name = models.CharField(u'データパターン名',
+                               default=None,
+                               max_length=100)
+
+    sort_no = models.IntegerField(u'表示順',
+                                  default=1,
+                                  validators=[MinValueValidator(1), MaxValueValidator(999)])
+
+    def __str__(self):
+        return self.dp_name
+
+    def __unicode__(self):
+        return u"{}".format(self.dp_name)
+
+#データパターン利用テーブル
+class DataPatternUse(models.Model):
+    user = models.ForeignKey(User)
+    trade_date = models.DateField(u'取引日',
+                                  default=timezone.now())    
+
+    at   = models.ForeignKey(AccountTitle,
+                             verbose_name=u'勘定科目'
+    )
+
+    dwm   = models.ForeignKey(DepositWithdrawalMethod,
+                              verbose_name=u'入出金方法',
+                              default=None,
+                              blank=True,
+                              null=True
+    )
+
+    desc = models.CharField(u'帳簿摘要',
+                            max_length=100,
+                            default=None
+    )
+
+    money = models.IntegerField(u'金額',
+                                validators=[MinValueValidator(-99999999), MaxValueValidator(99999999)],
+                                default=0
+    )
+
+
+    ab   = models.ForeignKey(AccountBook,
+                             verbose_name=u'帳簿情報',
+                             default=None,
+                             blank=True,
+                             null=True
+    )
+
+
+
+    def __str__(self):
+        return self.desc
+
+    def __unicode__(self):
+        return u"{}".format(self.desc)
+

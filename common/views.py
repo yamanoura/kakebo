@@ -1,3 +1,4 @@
+#coding=UTF8
 from django.shortcuts import render
 from django.views.generic import *
 from django.views.generic.edit import *
@@ -6,6 +7,7 @@ from django.views.generic.edit import *
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from .models import *
+from .menulist import *
 
 APP_NAME = 'common'
 
@@ -23,6 +25,8 @@ class MyPage(ListView):
         ctx = super(MyPage,self).get_context_data(**kwargs)
         ctx['is_logined'] = True
         ctx['userid']   = self.request.user
+
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
 
         return ctx
 

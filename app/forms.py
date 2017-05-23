@@ -190,3 +190,20 @@ class GeneralParameterForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
         super(GeneralParameterForm, self).__init__(*args, **kwargs)
+
+#データパターン名
+class DataPatternForm(ModelForm):
+    user = None
+    class Meta:
+        model = DataPattern
+        fields = ("at",
+                  "dp_name",
+                  "sort_no",
+        )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super(DataPatternForm, self).__init__(*args, **kwargs)
+
+
+

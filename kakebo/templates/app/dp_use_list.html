@@ -1,0 +1,113 @@
+{% extends 'common/base.html' %}
+{% load bootstrap %}
+{% load humanize %}
+
+{% block title %}DP利用データ検索{% endblock %}
+
+{% block page_name %}
+DP利用データ検索
+{% endblock %}
+
+{% block page_desc %}
+DP利用データの検索を行う
+{% endblock %}
+
+{% block main %}
+<form method="get" action="" name="search_form" id="search_form">
+  {% csrf_token %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	入出金種類
+      </div>
+      <div class="col-xs-8 col-sm-10 text-left">
+	<SELECT ID="search_dw_type_select" name="search_dw_type_select" class="form-control">
+	  <OPTION VALUE="" 
+		  {% ifequal search_dw_type_select "" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >---------</OPTION>
+	  <OPTION VALUE="0"
+		  {% ifequal search_dw_type_select "0" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >入金</OPTION>
+	  <OPTION VALUE="1"
+		  {% ifequal search_dw_type_select "1" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >出金</OPTION>
+	</SELECT>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-4 col-sm-2">
+	科目：
+      </div>
+      <div class="col-xs-8 col-sm-10">
+	<SELECT ID="search_at_select" name="search_at_select" class="form-control">
+	  <OPTION VALUE="" 
+		  {% ifequal search_at_select "" %}
+		  selected="selected"
+		  {% endifequal %}
+		  >---------</OPTION>
+	  {% for at_item in search_at %}
+	  <OPTION VALUE={{ at_item.id }}
+		  {% ifequal search_at_select at_item.id %}
+		  selected="selected"
+		  {% endifequal %}
+		  >{{ at_item.at_name }}</OPTION>
+	  {% endfor %}
+	  </SELECT>
+      </div>
+    </div>
+    <div class="row">      
+      <div class="col-xs-12 col-sm-12 text-left">
+	<button type="button" class="btn btn-primary input-lg form-control" onclick="search()">
+	  検索
+	</button>
+      </div>
+    </div>
+  </div>
+</form>
+{% if is_paginated %}
+<div class="pagination">
+  <span class="step-link">
+    {% if page_obj.has_previous %}
+    <a href="?{{ query_string }}&page={{ page_obj.previous_page_number }}">previous</a>
+    {% endif %}
+    <span class="page-current">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?{{ query_string }}&page={{ page_obj.next_page_number }}">next</a>
+    {% endif %}
+  </span>
+</div>
+{% else %}
+<br>
+{% endif %}
+<table class="table table-bordered table-striped">
+  <tr>
+    <th class="text-center bg-info">取引日付</th>
+    <th class="text-center bg-info">科目</th>
+    <th class="text-center bg-info">処理</th>
+  </tr>
+  {% for item in object_list %}
+  <tr>
+    <td>
+      <a href="/app/dp_use/add?search_trade_date={{ item.trade_date|date:'Y-m-d' }}&search_dw_type_select={{ item.at__at_type }}&search_at_select={{ item.at }}&is_submit_flag=1">{{ item.trade_date|date:'Y-m-d' }}</a>
+    </td>
+    <td>
+      {{ item.at_name }}
+    </td>
+    <td>
+      <button type="submit" class="btn btn-info input form-control" 
+	      onClick="location.href='/app/dp/delete/{{ item.id  }}'">
+	削除
+      </button>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

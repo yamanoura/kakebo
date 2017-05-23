@@ -13,6 +13,7 @@ from .models import *
 from .forms import *
 import sys
 from .constant import *
+from common.menulist import *
 
 # util
 import datetime
@@ -62,6 +63,7 @@ class BaseCreateView(BaseView,CreateView):
         ctx['is_logined'] = True
         ctx['is_addmode'] = True
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
         return ctx
 
     def get_form_kwargs(self):
@@ -119,6 +121,168 @@ class BaseCreateView(BaseView,CreateView):
 
     def get_param(self,param_name):
         return self.request.GET.get(param_name,'')
+
+
+class BaseListCreateView(BaseView,ListView):
+    success_url= SUCCESS_URL
+
+    def dispatch(self,request, *args, **kwargs):
+        class_object = self.get_object()
+
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect(AUTH_FAILURE % request.path)
+        else:
+            return super(class_object, self).dispatch(request,*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super(BaseListCreateView,self).get_context_data(**kwargs)
+        self.set_eachdefault_ctx(ctx)
+
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+
+        validator_name = re.sub(r'.html$','',template_file_name) + '.js'
+
+        ctx['validator_name'] = validator_name
+        ctx['is_logined'] = True
+        ctx['is_addmode'] = True
+
+        is_submit_flag = self.get_param('is_submit_flag')
+
+        if is_submit_flag == "":
+            ctx['is_detailmode'] = False
+        else:
+            ctx['is_detailmode'] = True
+
+        ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
+
+        search_trade_date = self.get_param('search_trade_date')
+        search_dw_type_select = self.get_param('search_dw_type_select')
+        search_at_select = self.get_param('search_at_select')
+
+        if is_submit_flag=="2":
+            modellist =self.get_modeldata()
+
+            for item in modellist:
+                item.money = self.get_param(str(item.id) + '_money')
+                
+                dwm_select = self.get_param(str(item.id) + '_dwm')
+                dwm_object = DepositWithdrawalMethod.objects.get(user=self.request.user,
+                                                                 id=dwm_select)
+                item.dwm = dwm_object
+
+                
+                if item.ab==None:
+                    if int(item.money) != 0:
+                        ab = AccountBook(user=self.request.user,
+                                         trade_date=item.trade_date,
+                                         dw_type=item.at.at_type,
+                                         at=item.at,
+                                         dwm=item.dwm,
+                                         project=None,
+                                         ab_desc='DPU ' + item.desc,
+                                         ab_money=item.money)
+
+                        ab.save()
+                        item.ab = ab
+                else:
+                    if int(item.money) == 0:
+                        item_ab = item.ab
+                        item.ab = None
+                        info(item_ab)
+                        item_ab.delete()
+                        
+                item.save()
+
+        return ctx
+
+    def set_eachdefault_ctx(self,ctx):
+        #画面項目セット
+        search_trade_date = self.get_param('search_trade_date')
+        search_trade_date = get_defaultdate(search_trade_date)
+        ctx['search_trade_date'] = search_trade_date
+
+        ctx['search_dw_type_select'] = self.get_param('search_dw_type_select')
+        search_at_select = self.request.GET.get('search_at_select','')
+
+        # templateの組み込みタグでの比較を行うために数値変換を行う
+        if(search_at_select!=""):
+            search_at_select = int(search_at_select)
+        ctx['search_at_select'] = search_at_select
+
+        search_at = DataPattern.objects.filter(user=self.request.user,
+                                               at__at_type=ctx['search_dw_type_select'])
+
+        search_at = search_at.values('at__id').annotate(id=Max('at__id'),at_name=Max('at__at_name'))
+
+        ctx['search_at'] = search_at
+
+        search_dwm = DepositWithdrawalMethod.objects.filter(user=self.request.user)
+
+        ctx['search_dwm'] = search_dwm
+
+    def get_queryset(self):
+        return self.get_modeldata()
+
+    def get_modeldata(self):
+        search_trade_date = self.get_param('search_trade_date')
+        search_dw_type_select = self.get_param('search_dw_type_select')
+        search_at_select = self.request.GET.get('search_at_select','')
+
+        if search_trade_date == "" or search_dw_type_select == "" or search_at_select == "":
+            return None
+
+        # templateの組み込みタグでの比較を行うために数値変換を行う
+        if(search_at_select!=""):
+            search_at_select = int(search_at_select)
+
+        dpu =  DataPatternUse.objects.filter(user=self.request.user,
+                                             trade_date=search_trade_date,
+                                             at=search_at_select
+        )
+
+        dp =  DataPattern.objects.filter(user=self.request.user,
+                                         at=search_at_select
+        )
+
+        dwm_default = DepositWithdrawalMethod.objects.get(user=self.request.user,
+                                                          dwm_type="0")
+
+        for dp_item in dp:
+            dpu_item_exist_flag = 0
+            for dpu_item in dpu:
+                if dp_item.dp_name == dpu_item.desc:
+                    dpu_item_exist_flag = 1
+
+            if dpu_item_exist_flag == 0:
+                dp_new = DataPatternUse(user=self.request.user,
+                                        trade_date=search_trade_date,
+                                        at=dp_item.at,
+                                        dwm=dwm_default,
+                                        desc=dp_item.dp_name,
+                                        money=0,
+                                        ab=None)
+
+                dp_new.save()
+
+        dpu =  DataPatternUse.objects.filter(user=self.request.user,
+                                             trade_date=search_trade_date,
+                                             at=search_at_select
+        )
+
+        return dpu
+
+    def get_dp_at(self):
+        return None
+
+    def get_template_name(self):
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name)
+        return validator_name
+
+    def get_param(self,param_name):
+        return self.request.GET.get(param_name,'')
+
         
 class BaseUpdateView(UpdateView):
     success_url = SUCCESS_URL
@@ -261,6 +425,7 @@ class BaseUpdateView(UpdateView):
         ctx['is_logined'] = True
         ctx['is_addmode'] = False
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
         return ctx
 
 
@@ -293,6 +458,7 @@ class BaseDeleteView(DeleteView):
         ctx['is_logined'] = True
         ctx['is_addmode'] = False
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
         return ctx
 
 class ProjectSearch(ListView):
@@ -315,6 +481,7 @@ class ProjectSearch(ListView):
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
 
         return ctx
 
@@ -353,6 +520,7 @@ class AccountTitleSearch(ListView):
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
 
         return ctx
 
@@ -388,6 +556,7 @@ class BankAccountSearch(ListView):
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
 
         return ctx
 
@@ -417,6 +586,7 @@ class DepositWithdrawalMethodSearch(ListView):
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
 
         return ctx
 
@@ -487,6 +657,7 @@ class AccountBookSearch(ListView):
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
 
         info(datetime.date.today().strftime('%Y-%m')+'-01')
 
@@ -581,6 +752,7 @@ class AccountBookPlanSearch(ListView):
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
 
         return ctx
 
@@ -637,6 +809,7 @@ class GeneralParameterSearch(ListView):
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
 
         return ctx
 
@@ -695,6 +868,7 @@ class AccountBookSum(ListView):
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
 
         return ctx
 
@@ -778,6 +952,7 @@ class AccountBookSumByMonth(ListView):
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
 
         return ctx
 
@@ -934,6 +1109,7 @@ class AccountBookSumByProject(ListView):
         ctx['is_logined'] = True
         ctx['query_string'] = self.request.GET.urlencode()
         ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
 
         return ctx
 
@@ -1060,6 +1236,10 @@ class AccountBookSumByYear(ListView):
         ctx['dw_0_total'] = ab_dw0 + abp_dw0
         ctx['dw_1_total'] = ab_dw1 + abp_dw1
 
+        ctx['is_logined'] = True
+        ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
+
         return ctx
 
     def get_queryset_ab(self,userid,search_trade_year):
@@ -1176,6 +1356,10 @@ class BankAccountBalanceInquiry(ListView):
 
             set_bab.save()
 
+        ctx['is_logined'] = True
+        ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
+
         return ctx
 
     def get_queryset_bab(self,userid):
@@ -1195,6 +1379,130 @@ class BankAccountBalanceInquiry(ListView):
 
     def get_param(self,param_name):
         return self.request.GET.get(param_name,'')
+
+
+#データパターン検索
+class DataPatternSearch(ListView):
+    model = DataPattern
+
+    def dispatch(self,request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/common/login/?next=%s' % request.path)
+        else:
+            return super(DataPatternSearch, self).dispatch(request,*args, **kwargs)
+
+    def set_common_ctx(self,ctx):
+        template_file_name = self.get_template_name()
+        ctx['validator_name'] = template_file_name + '.js'
+        ctx['is_logined'] = True
+        ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
+
+    def set_eachdefault_ctx(self,ctx):
+        #画面項目セット
+        ctx['search_dw_type_select'] = self.get_param('search_dw_type_select')
+        search_at_select = self.request.GET.get('search_at_select','')
+        # templateの組み込みタグでの比較を行うために数値変換を行う
+        if(search_at_select!=""):
+            search_at_select = int(search_at_select)
+        ctx['search_at_select'] = search_at_select
+
+        search_at = AccountTitle.objects.filter(user=self.request.user,
+                                                at_type=ctx['search_dw_type_select'])
+        ctx['search_at'] = search_at
+
+    def get_context_data(self, **kwargs):
+        ctx = super(DataPatternSearch,self).get_context_data(**kwargs)
+        self.set_common_ctx(ctx)
+        self.set_eachdefault_ctx(ctx)
+        return ctx
+
+    def get_queryset(self):
+        search_dw_type_select = self.get_param('search_dw_type_select')
+        search_at_select = self.get_param('search_at_select')
+
+        dp = DataPattern.objects.filter(user=self.request.user)
+        # templateの組み込みタグでの比較を行うために数値変換を行う
+        if(search_at_select!=""):
+            search_at_select = int(search_at_select)
+            dp = dp.filter(at=search_at_select)
+
+        rtn_list = dp
+        return rtn_list
+
+    def get_template_name(self):
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name)
+        return validator_name
+
+    def get_param(self,param_name):
+        return self.request.GET.get(param_name,'')
+
+
+#データパターン検索
+class DataPatternUseSearch(ListView):
+    model = DataPatternUse
+
+    def dispatch(self,request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/common/login/?next=%s' % request.path)
+        else:
+            return super(DataPatternUseSearch, self).dispatch(request,*args, **kwargs)
+
+    def set_common_ctx(self,ctx):
+        template_file_name = self.get_template_name()
+        ctx['validator_name'] = template_file_name + '.js'
+        ctx['is_logined'] = True
+        ctx['query_string'] = self.request.GET.urlencode()
+        ctx['userid']   = self.request.user
+        ctx['menu_category_list'] = MENU_CATEGORY_LIST
+
+    def set_eachdefault_ctx(self,ctx):
+        #画面項目セット
+        ctx['search_dw_type_select'] = self.get_param('search_dw_type_select')
+        search_at_select = self.request.GET.get('search_at_select','')
+        # templateの組み込みタグでの比較を行うために数値変換を行う
+        if(search_at_select!=""):
+            search_at_select = int(search_at_select)
+        ctx['search_at_select'] = search_at_select
+
+        search_at = DataPattern.objects.filter(user=self.request.user,
+                                               at__at_type=ctx['search_dw_type_select'])
+
+        search_at = search_at.values('at__id').annotate(id=Max('at__id'),at_name=Max('at__at_name'))
+
+        ctx['search_at'] = search_at
+
+    def get_context_data(self, **kwargs):
+        ctx = super(DataPatternUseSearch,self).get_context_data(**kwargs)
+        self.set_common_ctx(ctx)
+        self.set_eachdefault_ctx(ctx)
+        return ctx
+
+    def get_queryset(self):
+        search_dw_type_select = self.get_param('search_dw_type_select')
+        search_at_select = self.get_param('search_at_select')
+
+        dpu = DataPatternUse.objects.filter(user=self.request.user)
+        # templateの組み込みタグでの比較を行うために数値変換を行う
+        if(search_at_select!=""):
+            search_at_select = int(search_at_select)
+            dpu = dpu.filter(at=search_at_select)
+
+        dpu = dpu.values('trade_date','at__at_type','at').annotate(at_name=Max('at__at_name'))
+
+        rtn_list = dpu
+        return rtn_list
+
+    def get_template_name(self):
+        template_file_name = re.sub(r'^'+ APP_NAME + '/', '', self.template_name)
+        validator_name = re.sub(r'.html$','',template_file_name)
+        return validator_name
+
+    def get_param(self,param_name):
+        return self.request.GET.get(param_name,'')
+
 
 def info(msg):
     logger = logging.getLogger('command')
