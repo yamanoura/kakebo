@@ -186,11 +186,18 @@ class BaseListCreateView(BaseView,ListView):
                         ab.save()
                         item.ab = ab
                 else:
+                    item_ab = item.ab
                     if int(item.money) == 0:
-                        item_ab = item.ab
                         item.ab = None
                         info(item_ab)
                         item_ab.delete()
+
+                    else:
+                        info(item_ab.ab_money)
+                        item_ab.ab_money = item.money
+                        info(item_ab.ab_money)
+                        
+                        item_ab.save()
                         
                 item.save()
 
@@ -269,6 +276,8 @@ class BaseListCreateView(BaseView,ListView):
                                              trade_date=search_trade_date,
                                              at=search_at_select
         )
+
+        
 
         return dpu
 
